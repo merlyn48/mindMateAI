@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>About - MindMate AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <h2 class="logo">MindMate AI</h2>
+            <div class="sidebar-profile">
+
+                <img id="sidebarAvatar" class="sidebar-avatar">
+
+                <div class="sidebar-user">
+
+                    <span id="sidebarName"></span>
+
+                </div>
+
+            </div>
+
+            <!-- MAIN NAVIGATION -->
+
+            <nav class="nav-main">
+
+                <a href="dashboard.html">Dashboard</a>
+                <a href="index.html">Chat</a>
+
+            </nav>
+
+            <!-- ACCOUNT -->
+
+            <nav class="nav-secondary">
+
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+
+            </nav>
+
+            <!-- WEBSITE PAGES -->
+
+            <nav class="nav-info">
+
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+
+            </nav>
+
+            <button onclick="logout()" class="logout-btn">
+                Logout
+            </button>
+
+        </aside>
+
+        <main class="chat-section">
+
+            <div class="page-wrapper">
+
+                <div class="page-header">
+                    <h1>About MindMate AI</h1>
+                    <p>Learn about the purpose and technology behind MindMate.</p>
+                </div>
+
+                <div class="card-box">
+                    <p>
+                        MindMate AI is an AI-powered student counselling assistant designed
+                        to support students with stress, anxiety, motivation, and academic guidance.
+                    </p>
+                </div>
+
+                <div class="card-box">
+                    <h3>Technologies Used</h3>
+
+                    <ul>
+                        <li>HTML5</li>
+                        <li>CSS3</li>
+                        <li>JavaScript</li>
+                        <li>Local Storage</li>
+                    </ul>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+    <script src="sidebar.js"></script>
+    <script src="toast.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - MindMate AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        if (!localStorage.getItem("loggedInUser")) {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <div class="app-container">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+            <h2 class="logo">MindMate AI</h2>
+            <div class="sidebar-profile">
+
+                <img id="sidebarAvatar" class="sidebar-avatar">
+
+                <div class="sidebar-user">
+
+                    <span id="sidebarName"></span>
+
+                </div>
+
+            </div>
+
+            <!-- MAIN NAVIGATION -->
+
+            <nav class="nav-main">
+
+                <a href="dashboard.html">Dashboard</a>
+                <a href="index.html">Chat</a>
+
+            </nav>
+
+            <!-- ACCOUNT -->
+
+            <nav class="nav-secondary">
+
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+
+            </nav>
+
+            <!-- WEBSITE PAGES -->
+
+            <nav class="nav-info">
+
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+
+            </nav>
+
+            <button onclick="logout()" class="logout-btn">
+                Logout
+            </button>
+
+        </aside>
+
+
+        <!-- MAIN DASHBOARD CONTENT -->
+
+        <main class="main-area">
+
+            <header class="dashboard-header">
+
+                <h1>Welcome back 🌿</h1>
+
+                <p>
+                    Hello <strong id="welcomeName"></strong>, 
+                     take a moment to check in with yourself.
+                </p>
+
+            </header>
+
+
+            <!-- MOOD CHECK SECTION -->
+
+            <section class="mood-section">
+
+                <h3>How are you feeling today?</h3>
+
+                <div class="mood-buttons">
+
+                    <button onclick="setMood('happy')">🙂</button>
+                    <button onclick="setMood('okay')">😐</button>
+                    <button onclick="setMood('stressed')">😟</button>
+                    <button onclick="setMood('sad')">😔</button>
+
+                </div>
+                <br>
+                <p id="moodResult"></p>
+
+            </section>
+
+
+            <!-- SUPPORT OPTIONS -->
+
+            <section class="support-section">
+
+                <h3>How can MindMate support you today?</h3>
+
+                <div class="support-grid">
+
+                    <div class="support-card" onclick="window.location.href='index.html'">
+
+                        <h4>💬 Talk to MindMate</h4>
+                        <p>Start a supportive conversation and share what's on your mind.</p>
+
+                    </div>
+
+                    <div class="support-card">
+
+                        <h4>🧠 Manage Stress</h4>
+                        <p>Learn grounding techniques to calm your mind.</p>
+
+                    </div>
+
+                    <div class="support-card">
+
+                        <h4>📚 Study Motivation</h4>
+                        <p>Stay focused and productive when studying.</p>
+
+                    </div>
+
+                    <div class="support-card">
+
+                        <h4>🌙 Sleep Support</h4>
+                        <p>Relax your thoughts and improve sleep habits.</p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- WELLBEING PROGRESS -->
+
+            <section class="progress-section">
+
+                <h3>Your Well-being Progress This Week</h3>
+
+                <div class="week-tracker">
+
+                    <div class="day" id="day1"></div>
+                    <div class="day" id="day2"></div>
+                    <div class="day" id="day3"></div>
+                    <div class="day" id="day4"></div>
+                    <div class="day" id="day5"></div>
+                    <div class="day" id="day6"></div>
+                    <div class="day" id="day7"></div>
+
+                </div>
+
+                <div class="week-labels">
+                    <span>M</span>
+                    <span>T</span>
+                    <span>W</span>
+                    <span>T</span>
+                    <span>F</span>
+                    <span>S</span>
+                    <span>S</span>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="auth.js"></script>
+
+    <script>
+
+        /* USER NAME */
+
+document.getElementById("welcomeName").innerText =
+localStorage.getItem("loggedInUser");
+
+
+/* ================= MOOD SYSTEM ================= */
+
+function setMood(mood){
+
+localStorage.setItem("mindmate_mood", mood);
+
+/* save mood by day */
+
+const today = new Date().getDay(); // 0-6
+
+let moodWeek =
+JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
+
+moodWeek[today] = mood;
+
+localStorage.setItem(
+"mindmate_week_moods",
+JSON.stringify(moodWeek)
+);
+
+/* show message */
+
+const responses = {
+happy:"I'm glad you're feeling good today 😊",
+okay:"Thanks for checking in. I'm here if you want to talk.",
+stressed:"I'm sorry you're feeling stressed. Maybe chatting could help.",
+sad:"That sounds tough. Remember you're not alone."
+};
+
+document.getElementById("moodResult").textContent = responses[mood];
+
+/* update tracker */
+
+updateWeekTracker();
+
+}
+
+
+/* ================= WEEK TRACKER ================= */
+
+function updateWeekTracker(){
+
+let moods =
+JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
+
+/* mapping days to boxes */
+
+const dayMap = [7,1,2,3,4,5,6]; 
+// Sunday goes last
+
+for(let i=0;i<7;i++){
+
+let box = document.getElementById("day"+(i+1));
+
+if(!box) continue;
+
+box.className="day";
+
+/* find correct stored mood */
+
+let mood = moods[dayMap[i] % 7];
+
+if(mood){
+box.classList.add("mood-"+mood);
+}
+
+}
+
+}
+
+
+/* LOAD WHEN PAGE OPENS */
+
+window.onload = () => {
+
+const mood = localStorage.getItem("mindmate_mood");
+
+if(mood){
+document.getElementById("moodResult").textContent =
+"Today's mood: " + mood;
+}
+
+updateWeekTracker();
+
+};
+
+    </script>
+    <script>
+
+            const sidebarAvatar = document.getElementById("sidebarAvatar");
+            const sidebarName = document.getElementById("sidebarName");
+
+            const user = JSON.parse(localStorage.getItem("mindmate_user"));
+            const avatar = localStorage.getItem("mindmate_avatar");
+
+            if (sidebarName) {
+                sidebarName.innerText = user?.name || "User";
+            }
+
+            if (sidebarAvatar) {
+
+                if (avatar) {
+                    sidebarAvatar.src = avatar;
+                } else {
+                    sidebarAvatar.src =
+                        "https://ui-avatars.com/api/?name=" +
+                        (user?.name || "User") +
+                        "&background=8b7cf6&color=fff";
+                }
+
+            }
+
+    </script>
+
+    <script src="toast.js"></script>
+</body>
+
+</html>

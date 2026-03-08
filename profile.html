@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - MindMate AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <script>
+        if (!localStorage.getItem("loggedInUser")) {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <div class="app-container">
+
+        <!-- Sidebar -->
+
+        <aside class="sidebar">
+            <h2 class="logo">MindMate AI</h2>
+            <!-- MAIN NAVIGATION -->
+
+            <nav class="nav-main">
+
+                <a href="dashboard.html">Dashboard</a>
+                <a href="index.html">Chat</a>
+
+            </nav>
+
+            <!-- ACCOUNT -->
+
+            <nav class="nav-secondary">
+
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+
+            </nav>
+
+            <!-- WEBSITE PAGES -->
+
+            <nav class="nav-info">
+
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+
+            </nav>
+
+            <button onclick="logout()" class="logout-btn">
+                Logout
+            </button>
+
+        </aside>
+
+
+        <!-- Main Section -->
+
+        <main class="chat-section" style="padding:50px;">
+
+            <!-- PROFILE AVATAR -->
+
+            <div class="profile-avatar-section">
+
+                <div class="avatar-wrapper">
+
+                    <img id="profileAvatar" class="profile-avatar">
+
+                    <label for="avatarUpload" class="avatar-upload-btn">
+                        📷
+                    </label>
+
+                    <input type="file" id="avatarUpload" accept="image/*" hidden>
+
+                </div>
+
+                <h2 id="profileName"></h2>
+                <p class="profile-email" id="profileEmail"></p>
+
+            </div>
+
+
+            <h1>👤 Profile</h1>
+
+            <p style="opacity:0.7; margin-top:5px;">
+                Manage your account information
+            </p>
+
+
+            <div class="card-box">
+
+                <h3>Account Information</h3>
+
+                <div class="setting-row">
+                    <span>Status</span>
+                    <strong>Active User</strong>
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+        const avatar = document.getElementById("profileAvatar");
+        const upload = document.getElementById("avatarUpload");
+
+        const user = JSON.parse(localStorage.getItem("mindmate_user"));
+
+        document.getElementById("profileName").innerText =
+            user?.name || "User";
+
+        document.getElementById("profileEmail").innerText =
+            user?.email || "-";
+
+
+        /* Load avatar */
+
+        const savedAvatar = localStorage.getItem("mindmate_avatar");
+
+        if (savedAvatar) {
+
+            avatar.src = savedAvatar;
+
+        } else {
+
+            avatar.src =
+                "https://ui-avatars.com/api/?name="
+                + user?.name +
+                "&background=8b7cf6&color=fff";
+
+        }
+
+
+        /* Upload avatar */
+
+        upload.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+
+                avatar.src = e.target.result;
+
+                localStorage.setItem("mindmate_avatar", e.target.result);
+                showToast("Profile picture updated", "success");
+
+            }
+
+            reader.readAsDataURL(file);
+
+        });
+
+    </script>
+    <script src="sidebar.js"></script>
+    <script src="toast.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>FAQ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2 class="logo">MindMate AI</h2>
+            <div class="sidebar-profile">
+
+                <img id="sidebarAvatar" class="sidebar-avatar">
+
+                <div class="sidebar-user">
+
+                    <span id="sidebarName"></span>
+
+                </div>
+
+            </div>
+
+            <!-- MAIN NAVIGATION -->
+
+            <nav class="nav-main">
+
+                <a href="dashboard.html">Dashboard</a>
+                <a href="index.html">Chat</a>
+
+            </nav>
+
+            <!-- ACCOUNT -->
+
+            <nav class="nav-secondary">
+
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+
+            </nav>
+
+            <!-- WEBSITE PAGES -->
+
+            <nav class="nav-info">
+
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+
+            </nav>
+
+            <button onclick="logout()" class="logout-btn">
+                Logout
+            </button>
+
+        </aside>
+
+        <main class="chat-section">
+
+            <div class="page-wrapper">
+
+                <div class="page-header">
+                    <h1>❓ Frequently Asked Questions</h1>
+                </div>
+
+                <div class="faq-item">
+                    <b>Is this real AI?</b>
+                    Currently this version uses rule-based logic.
+                </div>
+
+                <div class="faq-item">
+                    <b>Is my data stored?</b>
+                    Your data is stored locally in your browser.
+                </div>
+
+                <div class="faq-item">
+                    <b>Is MindMate a replacement for therapy?</b>
+                    No. It is only a support tool and not a medical service.
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+    <script src="sidebar.js"></script>
+    <script src="toast.js"></script>
+</body>
+
+</html>

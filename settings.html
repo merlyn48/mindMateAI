@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - MindMate AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <h2 class="logo">MindMate AI</h2>
+            <div class="sidebar-profile">
+
+                <img id="sidebarAvatar" class="sidebar-avatar">
+
+                <div class="sidebar-user">
+
+                    <span id="sidebarName"></span>
+
+                </div>
+
+            </div>
+
+            <!-- MAIN NAVIGATION -->
+
+            <nav class="nav-main">
+
+                <a href="dashboard.html">Dashboard</a>
+                <a href="index.html">Chat</a>
+
+            </nav>
+
+            <!-- ACCOUNT -->
+
+            <nav class="nav-secondary">
+
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+
+            </nav>
+
+            <!-- WEBSITE PAGES -->
+
+            <nav class="nav-info">
+
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+
+            </nav>
+
+            <button onclick="logout()" class="logout-btn">
+                Logout
+            </button>
+
+        </aside>
+
+        <main class="chat-section" style="padding:50px;">
+            <h1>⚙ Settings</h1>
+            <br>
+
+            <div class="card-box">
+
+                <h3>Preferences</h3>
+
+                <div class="setting-row">
+                    <span>Dark Mode</span>
+                    <span>Auto</span>
+                </div>
+
+                <div class="setting-row">
+                    <span>Email Notifications</span>
+                    <span>Enabled</span>
+                </div>
+
+                <div class="setting-row">
+                    <span>Chat History</span>
+                    <span>Stored Locally</span>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+    <script src="sidebar.js"></script>
+    <script src="toast.js"></script>
+</body>
+
+</html>
