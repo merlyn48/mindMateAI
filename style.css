@@ -1,0 +1,653 @@
+:root{
+
+/* Light theme */
+
+--bg-main:#f7f6fb;
+--bg-sidebar:#ffffff;
+--bg-card:#ffffff;
+--bg-input:#ffffff;
+
+--accent:#8b7cf6;
+--accent-soft:#ede9fe;
+
+--text-primary:#2d2a40;
+--text-secondary:#6b6b85;
+
+--border:#ececf3;
+
+--user-msg:#8b7cf6;
+--bot-msg:#f1f1f8;
+
+}
+
+/* Dark Theme */
+
+body.dark-mode{
+
+--bg-main:#161622;
+--bg-sidebar:#1d1d2b;
+--bg-card:#232335;
+--bg-input:#2b2b3f;
+
+--accent:#9c8cff;
+--accent-soft:#2e2e4a;
+
+--text-primary:#f1f1f7;
+--text-secondary:#b7b7d4;
+
+--border:#34344f;
+
+--user-msg:#7c6ee6;
+--bot-msg:#2c2c45;
+
+}
+
+/* GLOBAL */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body{
+background:var(--bg-main);
+color:var(--text-primary);
+height:100vh;
+overflow:hidden;
+transition:0.25s;
+}
+
+/* APP LAYOUT */
+
+.app-container{
+display:flex;
+height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:230px;
+background:var(--bg-sidebar);
+border-right:1px solid var(--border);
+padding:25px;
+display:flex;
+flex-direction:column;
+}
+
+.logo{
+font-weight:600;
+font-size:20px;
+margin-bottom:10px;
+}
+
+.user-label{
+font-size:13px;
+color:var(--text-secondary);
+margin-bottom:30px;
+}
+
+.sidebar nav{
+display:flex;
+flex-direction:column;
+margin-bottom:25px;
+}
+
+.sidebar a{
+text-decoration:none;
+color:var(--text-primary);
+padding:7px 0;
+font-size:14px;
+transition:0.2s;
+}
+
+.sidebar a:hover{
+color:var(--accent);
+}
+
+.logout-btn{
+margin-top:auto;
+padding:9px;
+border:none;
+background:#ef4444;
+color:white;
+border-radius:7px;
+cursor:pointer;
+}
+
+/* MAIN AREA */
+
+.main-area{
+flex:1;
+padding:60px;
+max-width:900px;
+}
+
+.dashboard-header h1{
+font-size:30px;
+margin-bottom:5px;
+}
+
+.dashboard-header p{
+color:var(--text-secondary);
+}
+
+/* MOOD CARD */
+
+.mood-section{
+margin-top:30px;
+padding:25px;
+background:var(--bg-card);
+border-radius:16px;
+box-shadow:0 8px 18px rgba(0,0,0,0.05);
+width:360px;
+}
+
+.mood-buttons{
+display:flex;
+gap:12px;
+margin-top:15px;
+}
+
+.mood-buttons button{
+font-size:22px;
+border:none;
+background:var(--accent-soft);
+border-radius:10px;
+padding:8px 12px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.mood-buttons button:hover{
+transform:scale(1.1);
+}
+
+/* SUPPORT SECTION */
+
+.support-section{
+margin-top:50px;
+}
+
+.support-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:18px;
+margin-top:15px;
+}
+
+.support-card{
+background:var(--bg-card);
+padding:16px;
+border-radius:12px;
+box-shadow:0 8px 18px rgba(0,0,0,0.05);
+cursor:pointer;
+transition:0.25s;
+}
+
+.support-card:hover{
+transform:translateY(-3px);
+}
+
+.support-card h4{
+margin-bottom:4px;
+font-size:15px;
+}
+
+.support-card p{
+font-size:12px;
+color:var(--text-secondary);
+}
+
+/* PROGRESS */
+
+.progress-section{
+margin-top:50px;
+}
+
+.progress-card{
+background:var(--bg-card);
+padding:20px;
+border-radius:14px;
+width:280px;
+box-shadow:0 8px 18px rgba(0,0,0,0.05);
+font-size:12px;
+}
+
+/* CHAT PAGE */
+
+.chat-section{
+flex:1;
+display:flex;
+flex-direction:column;
+background:var(--bg-main);
+}
+
+.chat-container{
+flex:1;
+overflow-y:auto;
+padding:30px 20%;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.message{
+max-width:70%;
+padding:12px 16px;
+border-radius:14px;
+font-size:14px;
+}
+
+.user-message{
+align-self:flex-end;
+background:var(--user-msg);
+color:white;
+}
+
+.bot-message{
+align-self:flex-start;
+background:var(--bot-msg);
+border:1px solid var(--border);
+}
+
+/* INPUT */
+
+.input-area{
+display:flex;
+padding:15px 20%;
+border-top:1px solid var(--border);
+}
+
+.input-area input{
+flex:1;
+padding:12px;
+border-radius:25px;
+border:1px solid var(--border);
+background:var(--bg-input);
+color:var(--text-primary);
+outline:none;
+}
+
+.send-btn{
+margin-left:10px;
+padding:12px 18px;
+border-radius:50%;
+border:none;
+background:var(--accent);
+color:white;
+cursor:pointer;
+}
+
+/* SUGGESTIONS */
+
+.suggestions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.suggestion-btn{
+padding:8px 14px;
+border-radius:20px;
+border:1px solid var(--border);
+background:var(--bg-card);
+cursor:pointer;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.sidebar{
+display:none;
+}
+
+.chat-container{
+padding:20px;
+}
+
+.input-area{
+padding:10px 20px;
+}
+
+.main-area{
+padding:30px;
+}
+
+.support-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+/* ================= PAGE LAYOUT ================= */
+
+.page-wrapper{
+max-width:900px;
+margin:auto;
+padding:50px 20px;
+}
+
+.page-header{
+margin-bottom:30px;
+}
+
+.page-header h1{
+font-size:30px;
+margin-bottom:6px;
+}
+
+.page-header p{
+color:var(--text-secondary);
+font-size:14px;
+}
+
+/* ================= CARDS ================= */
+
+.card-box{
+background:var(--bg-card);
+padding:25px;
+border-radius:14px;
+margin-bottom:20px;
+border:1px solid var(--border);
+box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+
+.card-box h3{
+margin-bottom:10px;
+}
+
+/* ================= FORM ================= */
+
+.input-style{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border-radius:8px;
+border:1px solid var(--border);
+background:var(--bg-input);
+color:var(--text-primary);
+font-size:14px;
+}
+
+textarea.input-style{
+min-height:120px;
+resize:vertical;
+}
+
+/* ================= FAQ ================= */
+
+.faq-item{
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:12px;
+padding:18px;
+margin-bottom:12px;
+}
+
+.faq-item b{
+display:block;
+margin-bottom:6px;
+}
+
+/* ================= SETTINGS ================= */
+
+.setting-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 0;
+border-bottom:1px solid var(--border);
+}
+
+.setting-row:last-child{
+border-bottom:none;
+}
+
+/* PROFILE AVATAR */
+
+.profile-avatar-section{
+display:flex;
+flex-direction:column;
+align-items:center;
+margin-bottom:30px;
+}
+
+.avatar-wrapper{
+position:relative;
+width:120px;
+height:120px;
+margin-bottom:10px;
+}
+
+.profile-avatar{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+background:var(--accent-soft);
+border:4px solid var(--bg-card);
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+.avatar-upload-btn{
+position:absolute;
+bottom:0;
+right:0;
+background:var(--accent);
+color:white;
+width:34px;
+height:34px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+font-size:14px;
+}
+
+.profile-email{
+font-size:14px;
+color:var(--text-secondary);
+}
+
+/* SIDEBAR USER */
+
+.sidebar-profile{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:20px;
+}
+
+.sidebar-avatar{
+width:36px;
+height:36px;
+border-radius:50%;
+object-fit:cover;
+background:var(--accent-soft);
+}
+
+.avatar-upload-btn:hover{
+transform:scale(1.1);
+}
+
+.sidebar-user{
+font-size:13px;
+font-weight:500;
+align-items: end;
+}
+
+/* ================= PRIMARY ACTION BUTTON ================= */
+
+.primary-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+
+padding:12px 22px;
+border:none;
+border-radius:10px;
+
+background:linear-gradient(135deg,#7c6ee6,#9184ff);
+color:white;
+font-size:14px;
+font-weight:500;
+
+cursor:pointer;
+transition:all .25s ease;
+
+box-shadow:0 6px 16px rgba(124,110,230,0.35);
+}
+
+.primary-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 22px rgba(124,110,230,0.45);
+}
+
+.primary-btn:active{
+transform:scale(0.97);
+}
+
+/* ================= TOAST NOTIFICATIONS ================= */
+
+.toast-container{
+position:fixed;
+top:20px;
+right:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+z-index:9999;
+}
+
+.toast{
+display:flex;
+align-items:center;
+gap:10px;
+
+background:var(--bg-card);
+color:var(--text-primary);
+
+padding:12px 16px;
+border-radius:10px;
+
+border:1px solid var(--border);
+
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+
+font-size:14px;
+
+opacity:0;
+transform:translateY(-10px);
+
+animation:toastIn 0.35s forwards;
+}
+
+/* success style */
+
+.toast.success{
+border-left:4px solid #22c55e;
+}
+
+/* error style */
+
+.toast.error{
+border-left:4px solid #ef4444;
+}
+
+/* info style */
+
+.toast.info{
+border-left:4px solid #7c6ee6;
+}
+
+@keyframes toastIn{
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+@keyframes toastOut{
+to{
+opacity:0;
+transform:translateY(-10px);
+}
+}
+
+.progress-bar{
+width:100%;
+height:12px;
+background:var(--accent-soft);
+border-radius:10px;
+margin:10px 0 6px;
+overflow:hidden;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#7c6ee6,#9184ff);
+transition:width 0.5s ease;
+}
+
+/* ================= WEEK MOOD TRACKER ================= */
+
+.week-tracker-container{
+background:var(--bg-card);
+padding:18px 20px;
+border-radius:14px;
+box-shadow:0 8px 18px rgba(0,0,0,0.05);
+max-width:420px;
+margin-top:12px;
+}
+
+/* bars */
+
+.week-tracker{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:14px;
+margin-top:12px;
+}
+
+/* individual day bar */
+
+.day{
+height:124px;                 
+border-radius:10px;
+background:#e8e8ef;
+transition:0.25s;
+}
+
+/* mood colors */
+
+.mood-happy{background:#9fd5c0;}
+.mood-okay{background:#e6c09f;}
+.mood-stressed{background:#dba7c3;}
+.mood-sad{background:#b4a7d6;}
+
+/* animation when mood selected */
+
+.day[class*="mood-"]{
+transform:scale(1.05);
+box-shadow:0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* weekday labels */
+
+.week-labels{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:14px;
+margin-top:8px;
+font-size:13px;
+color:var(--text-secondary);
+text-align:center;
+}

@@ -1,0 +1,255 @@
+:root{
+  --primary: #a78bfa;        /* calm lavender */
+  --primary-soft:#ede9fe;    /* light lavender background */
+  --mint:#9dd9d2;            /* calming mint */
+  --bg-main:#fdf9f4;         /* warm soft background */
+  --card-bg:#ffffff;
+  --input-bg:#f3f4f6;
+  --text-dark:#3d2f4a;
+  --text-soft:#6b5b7b;
+}
+
+/* Background */
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:linear-gradient(135deg,#ede9fe,#d1fae5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+/* Main container */
+.auth-container{
+    width:90%;
+    max-width:1100px;
+    background:var(--card-bg);
+    border-radius:18px;
+    display:flex;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.08);
+}
+
+/* Left Side */
+.auth-left{
+    flex:1;
+    background:linear-gradient(140deg,#a78bfa,#9dd9d2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+    position:relative;
+}
+
+.auth-left img {
+    max-width: 85%;
+}
+
+/* Decorative circles */
+.auth-left::before,
+.auth-left::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-left::before {
+    width: 150px;
+    height: 150px;
+    top: 30px;
+    left: 30px;
+}
+
+.auth-left::after {
+    width: 100px;
+    height: 100px;
+    bottom: 40px;
+    right: 40px;
+}
+
+/* Right Side */
+.auth-right{
+    flex:1;
+    padding:60px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.auth-right h2{
+    font-size:28px;
+    margin-bottom:30px;
+    text-align:center;
+    color:#3d2f4a;
+}
+
+.auth-right span {
+    color: #3b82f6;
+}
+
+/* Inputs */
+.auth-right input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border-radius:10px;
+    border:1px solid #e6e6e6;
+    background:#f7f7fb;
+    font-size:14px;
+    color:#333;
+}
+
+.auth-right input:focus{
+    outline:none;
+    border-color:#a78bfa;
+    background:white;
+}
+
+/* Remember row */
+.remember-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:10px 0 25px 0;
+    font-size:14px;
+}
+
+.remember-row label {
+    display: flex;
+    align-items: center;
+}
+
+.remember-row input {
+    margin-right: 6px;
+}
+
+/* Button */
+.auth-btn{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:none;
+    background:linear-gradient(90deg,#a78bfa,#7dd3fc);
+    color:white;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.auth-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* Links */
+.auth-link{
+    margin-top:22px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:14px;
+    color:#555;   /* makes the text visible */
+}
+
+.auth-link a{
+    color:#6366f1;
+    text-decoration:none;
+    font-weight:500;
+    margin-left:5px;
+}
+
+.auth-link a:hover{
+    text-decoration:underline;
+}
+
+.auth-link span{
+    margin-right:5px;
+}
+
+.checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:#555;
+}
+
+.checkbox-row input{
+    width:16px;
+    height:16px;
+    margin:0;
+    transform: translateY(1px);
+}
+
+.checkbox-row span{
+    line-height:1;
+}
+
+/* ================= TOAST NOTIFICATIONS ================= */
+
+.toast-container{
+position:fixed;
+top:20px;
+right:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+z-index:9999;
+}
+
+.toast{
+display:flex;
+align-items:center;
+gap:10px;
+
+background:var(--bg-card);
+color:var(--text-primary);
+
+padding:12px 16px;
+border-radius:10px;
+
+border:1px solid var(--border);
+
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+
+font-size:14px;
+
+opacity:0;
+transform:translateY(-10px);
+
+animation:toastIn 0.35s forwards;
+}
+
+/* success style */
+
+.toast.success{
+border-left:4px solid #22c55e;
+}
+
+/* error style */
+
+.toast.error{
+border-left:4px solid #ef4444;
+}
+
+/* info style */
+
+.toast.info{
+border-left:4px solid #7c6ee6;
+}
+
+@keyframes toastIn{
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+@keyframes toastOut{
+to{
+opacity:0;
+transform:translateY(-10px);
+}
+}
