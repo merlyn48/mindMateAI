@@ -61,25 +61,24 @@ No external frameworks were used to keep the project lightweight and easy to und
 ## Project Structure 📂
 
 MindMate-AI-Project
-│
-├── dashboard.html
-├── index.html
-├── profile.html
-├── settings.html
-├── about.html
-├── faq.html
-├── contact.html
-├── privacy.html
-│
-├── login.html
-├── register.html
-│
-├── style.css
-├── chat.css
-├── auth.css
-│
-├── script.js
-├── auth.js
-├── toast.js
-│
-└── README.md
+- dashboard.html
+- index.html
+- profile.html
+- settings.html
+- about.html
+- faq.html
+- contact.html
+- privacy.html
+
+- login.html
+- register.html
+
+- style.css
+- chat.css
+- auth.css
+
+- script.js
+- auth.js
+- toast.js
+
+- README.md
