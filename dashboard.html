@@ -249,7 +249,7 @@
             const responses = {
                 happy: "I'm glad you're feeling good today 😊",
                 okay: "Thanks for checking in. I'm here if you want to talk.",
-                stressed: "I'm sorry you're feeling stressed.",
+                stressed: "I'm sorry you're feeling stressed. Maybe chatting could help.",
                 sad: "That sounds tough. Remember you're not alone."
             };
 
@@ -269,11 +269,12 @@
             let moods =
                 JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
 
-            /* mapping days to boxes */
-
-            const dayMap = [7, 1, 2, 3, 4, 5, 6];
-            // Sunday goes last
-
+            /*
+              Boxes 1-7 = Mon Tue Wed Thu Fri Sat Sun
+              getDay() returns: 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+              So box index i (0-based) maps to getDay() key: (i+1) % 7
+              i=0 Mon → key 1, i=1 Tue → key 2 ... i=5 Sat → key 6, i=6 Sun → key 0
+            */
             for (let i = 0; i < 7; i++) {
 
                 let box = document.getElementById("day" + (i + 1));
@@ -282,9 +283,9 @@
 
                 box.className = "day";
 
-                /* find correct stored mood */
+                let key = (i + 1) % 7; // Mon=1 ... Sat=6, Sun=0
 
-                let mood = moods[dayMap[i] % 7];
+                let mood = moods[key];
 
                 if (mood) {
                     box.classList.add("mood-" + mood);
@@ -339,8 +340,9 @@
     </script>
 
     <script src="toast.js"></script>
-<script src="audio.js"></script>
-<script src="effects.js"></script>
+    <audio id="calmAudio" loop>
+  <source src="audio/calm-ambience.mp3" type="audio/mp3">
+</audio>
 </body>
 
 </html>
