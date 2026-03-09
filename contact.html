@@ -78,7 +78,12 @@
 
                     <textarea placeholder="Your Message" class="input-style"></textarea>
 
-                    <button class="primary-btn">
+                    <input type="text" id="contactName" placeholder="Your Name" class="input-style">
+                    <input type="email" id="contactEmail" placeholder="Your Email" class="input-style">
+
+                    <textarea id="contactMessage" placeholder="Your Message" class="input-style"></textarea>
+
+                    <button class="primary-btn" onclick="sendContact()">
                         📨 Send Message
                     </button>
 
@@ -89,6 +94,25 @@
         </main>
 
     </div>
+    <script>
+        function sendContact() {
+
+            const name = document.getElementById("contactName").value;
+            const email = document.getElementById("contactEmail").value;
+            const message = document.getElementById("contactMessage").value;
+
+            const subject = "MindMate Contact Message";
+            const body =
+                `Name: ${name}
+Email: ${email}
+
+Message:
+${message}`;
+
+            window.location.href =
+                `mailto:mindmateAI@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+    </script>
     <script src="sidebar.js"></script>
     <script src="toast.js"></script>
 </body>
