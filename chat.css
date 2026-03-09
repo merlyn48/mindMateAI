@@ -123,3 +123,14 @@ body.dark-mode .suggestion-btn { background:var(--c-surface2); }
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(124,110,230,0.22);border-radius:50px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(124,110,230,0.42)}
+
+/* ── chat page: nav links inherit from style.css, just need spacing ── */
+.chat-history {
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 220px;  /* cap history so nav links stay visible */
+}
+
+/* push nav links and footer down naturally */
+.sidebar > .nav-main   { margin-top: auto; }
+.sidebar > .nav-secondary { margin-top: 0; }
