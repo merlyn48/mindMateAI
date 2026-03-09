@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Contact - MindMate AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,47 +14,39 @@
 
     <div class="app-container">
 
+        <!-- Sidebar -->
+
         <aside class="sidebar">
             <h2 class="logo">MindMate AI</h2>
+
             <div class="sidebar-profile">
-
                 <img id="sidebarAvatar" class="sidebar-avatar">
-
                 <div class="sidebar-user">
-
                     <span id="sidebarName"></span>
-
                 </div>
-
             </div>
 
             <!-- MAIN NAVIGATION -->
 
             <nav class="nav-main">
-
                 <a href="dashboard.html">Dashboard</a>
                 <a href="index.html">Chat</a>
-
             </nav>
 
             <!-- ACCOUNT -->
 
             <nav class="nav-secondary">
-
                 <a href="profile.html">Profile</a>
                 <a href="settings.html">Settings</a>
-
             </nav>
 
             <!-- WEBSITE PAGES -->
 
             <nav class="nav-info">
-
                 <a href="about.html">About</a>
                 <a href="faq.html">FAQ</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy Policy</a>
-
             </nav>
 
             <button onclick="logout()" class="logout-btn">
@@ -61,6 +54,8 @@
             </button>
 
         </aside>
+
+        <!-- Main Content -->
 
         <main class="chat-section">
 
@@ -74,6 +69,7 @@
                 <div class="card-box">
 
                     <input type="text" id="contactName" placeholder="Your Name" class="input-style">
+
                     <input type="email" id="contactEmail" placeholder="Your Email" class="input-style">
 
                     <textarea id="contactMessage" placeholder="Your Message" class="input-style"></textarea>
@@ -89,14 +85,25 @@
         </main>
 
     </div>
+
+
     <script>
+
         function sendContact() {
 
             const name = document.getElementById("contactName").value;
             const email = document.getElementById("contactEmail").value;
             const message = document.getElementById("contactMessage").value;
 
+            /* validation */
+
+            if (!name || !email || !message) {
+                showToast("Please fill all fields", "error");
+                return;
+            }
+
             const subject = "MindMate Contact Message";
+
             const body =
                 `Name: ${name}
 Email: ${email}
@@ -106,10 +113,14 @@ ${message}`;
 
             window.location.href =
                 `mailto:mindmateAI@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
         }
+
     </script>
+
     <script src="sidebar.js"></script>
     <script src="toast.js"></script>
+
 </body>
 
 </html>
