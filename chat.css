@@ -51,10 +51,10 @@ body.dark-mode .sidebar { background:var(--c-surface);border-right-color:var(--c
 }
 
 .theme-toggle {
-  padding:8px 12px;border-radius:var(--r-sm);
+  width:100%;padding:9px 14px;border-radius:var(--r-sm);
   background:var(--c-accent-soft);border:1px solid var(--c-border);
   color:var(--c-text);font-size:13px;font-family:inherit;cursor:pointer;
-  transition:all 0.22s var(--ease-spring);
+  transition:all 0.22s var(--ease-spring);text-align:left;
 }
 .theme-toggle:hover { background:rgba(124,110,230,0.18);transform:translateY(-1px); }
 
