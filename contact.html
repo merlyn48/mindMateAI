@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,6 +9,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -17,36 +19,45 @@
         <!-- Sidebar -->
 
         <aside class="sidebar">
+
             <h2 class="logo">MindMate AI</h2>
 
             <div class="sidebar-profile">
                 <img id="sidebarAvatar" class="sidebar-avatar">
+
                 <div class="sidebar-user">
                     <span id="sidebarName"></span>
                 </div>
+
             </div>
 
             <!-- MAIN NAVIGATION -->
 
             <nav class="nav-main">
+
                 <a href="dashboard.html">Dashboard</a>
                 <a href="index.html">Chat</a>
+
             </nav>
 
             <!-- ACCOUNT -->
 
             <nav class="nav-secondary">
+
                 <a href="profile.html">Profile</a>
                 <a href="settings.html">Settings</a>
+
             </nav>
 
             <!-- WEBSITE PAGES -->
 
             <nav class="nav-info">
+
                 <a href="about.html">About</a>
                 <a href="faq.html">FAQ</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy Policy</a>
+
             </nav>
 
             <button onclick="logout()" class="logout-btn">
@@ -62,27 +73,29 @@
             <div class="page-wrapper">
 
                 <div class="page-header">
+
                     <h1>📩 Contact Us</h1>
                     <p>Have questions or feedback? We'd love to hear from you.</p>
+
                 </div>
 
                 <div class="card-box">
 
-                    <form action="https://api.web3forms.com/submit" method="POST">
+                    <form id="contactForm">
 
-<input type="hidden" name="access_key" value="639f2747-9168-4827-a211-de4f7ab9d818">
+                        <input type="hidden" name="access_key" value="639f2747-9168-4827-a211-de4f7ab9d818">
 
-<input type="text" name="name" placeholder="Your Name" class="input-style" required>
+                        <input type="text" name="name" placeholder="Your Name" class="input-style" required>
 
-<input type="email" name="email" placeholder="Your Email" class="input-style" required>
+                        <input type="email" name="email" placeholder="Your Email" class="input-style" required>
 
-<textarea name="message" placeholder="Your Message" class="input-style" required></textarea>
+                        <textarea name="message" placeholder="Your Message" class="input-style" required></textarea>
 
-<button type="submit" class="primary-btn">
-📨 Send Message
-</button>
+                        <button type="submit" class="primary-btn">
+                            📨 Send Message
+                        </button>
 
-</form>
+                    </form>
 
                 </div>
 
@@ -95,35 +108,37 @@
 
     <script>
 
-        function sendContact() {
+        const form = document.getElementById("contactForm");
 
-            const name = document.getElementById("contactName").value;
-            const email = document.getElementById("contactEmail").value;
-            const message = document.getElementById("contactMessage").value;
+        form.addEventListener("submit", async function (e) {
 
-            /* validation */
+            e.preventDefault();
 
-            if (!name || !email || !message) {
-                showToast("Please fill all fields", "error");
-                return;
+            const formData = new FormData(form);
+
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+
+                showToast("Message sent successfully!", "success");
+
+                form.reset();
+
+            } else {
+
+                showToast("Failed to send message", "error");
+
             }
 
-            const subject = "MindMate Contact Message";
-
-            const body =
-                `Name: ${name}
-Email: ${email}
-
-Message:
-${message}`;
-
-           window.open(
-`https://mail.google.com/mail/?view=cm&fs=1&to=mindmateAI@proton.me&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-);
-
-        }
+        });
 
     </script>
+
 
     <script src="sidebar.js"></script>
     <script src="toast.js"></script>
@@ -131,3 +146,4 @@ ${message}`;
 </body>
 
 </html>
+```
