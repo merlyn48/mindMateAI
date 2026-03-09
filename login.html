@@ -1,56 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Login - MindMate AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="auth.css">
+  <meta charset="UTF-8">
+  <title>Login - MindMate AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="auth.css">
 </head>
-
 <body>
 
-    <div class="auth-container">
+  <!-- Layered background scene -->
+  <div class="bg-scene"></div>
+  <div class="grain"></div>
 
-        <!-- Left Side -->
-        <div class="auth-left">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Robot">
-            <div class="auth-brand"><h3>MindMate AI</h3><p>Your calm space to think</p></div>
+  <!-- Floating botanical petals -->
+  <span class="petal" style="--lx:5%;  --sz:18px; --dur:22s; --delay:0s;   --sway:35px">🌸</span>
+  <span class="petal" style="--lx:14%; --sz:14px; --dur:19s; --delay:3s;   --sway:-28px">✿</span>
+  <span class="petal" style="--lx:25%; --sz:20px; --dur:25s; --delay:6s;   --sway:40px">🍃</span>
+  <span class="petal" style="--lx:38%; --sz:13px; --dur:17s; --delay:1.5s; --sway:-22px">✦</span>
+  <span class="petal" style="--lx:52%; --sz:22px; --dur:28s; --delay:4s;   --sway:50px">🌿</span>
+  <span class="petal" style="--lx:63%; --sz:15px; --dur:20s; --delay:8s;   --sway:-35px">❀</span>
+  <span class="petal" style="--lx:74%; --sz:17px; --dur:23s; --delay:2s;   --sway:28px">🌸</span>
+  <span class="petal" style="--lx:83%; --sz:12px; --dur:16s; --delay:5s;   --sway:-18px">⋆</span>
+  <span class="petal" style="--lx:91%; --sz:19px; --dur:21s; --delay:9s;   --sway:42px">✿</span>
+  <span class="petal" style="--lx:97%; --sz:14px; --dur:18s; --delay:11s;  --sway:-30px">🍃</span>
+
+  <div class="auth-container">
+
+    <!-- Left -->
+    <div class="auth-left">
+      <div class="auth-left-inner">
+        <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+          <div class="illust-ring"></div>
+          <div class="illust-ring" style="animation-delay:0.6s"></div>
+          <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MindMate">
         </div>
-
-        <!-- Right Side -->
-        <div class="auth-right">
-            <h2>Welcome back to <span>MindMate AI!</span></h2>
-
-            <input type="email" id="email" placeholder="Enter your email">
-            <input type="password" id="password" placeholder="Enter your password">
-
-            <div class="remember-row">
-
-                <label class="checkbox-row">
-                    <input type="checkbox">
-                    <span>Remember Me</span>
-                </label>
-
-                <a href="#" style="text-decoration: none;">Forgot Password?</a>
-
-            </div>
-
-            <button class="auth-btn" onclick="login()">Sign In</button>
-
-            <div class="auth-link">
-                <span>Don't have an account? </span>
-                <a href="register.html"> Sign Up</a>
-            </div>
+        <div class="auth-brand">
+          <h3>MindMate AI</h3>
+          <p>Your calm space to think &amp; grow</p>
         </div>
-
+        <div class="auth-pills">
+          <span class="auth-pill" style="--pd:0.3s">🌿 Be present</span>
+          <span class="auth-pill" style="--pd:0.4s">💜 You matter</span>
+          <span class="auth-pill" style="--pd:0.5s">✦ Breathe</span>
+        </div>
+      </div>
     </div>
 
-    <script src="auth.js"></script>
-    <script src="toast.js"></script>
-<script src="audio.js"></script>
-</body>
+    <!-- Right -->
+    <div class="auth-right">
+      <h2>Welcome back to <span>MindMate AI</span> 🌿</h2>
 
+      <div class="input-wrap" style="--iw-delay:0.28s">
+        <input type="email" id="email" placeholder="Your email address" autocomplete="email">
+      </div>
+      <div class="input-wrap" style="--iw-delay:0.34s">
+        <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+      </div>
+
+      <div class="remember-row">
+        <label class="checkbox-row">
+          <input type="checkbox">
+          <span>Remember me</span>
+        </label>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button class="auth-btn" onclick="login()">Sign In →</button>
+
+      <div class="auth-link">
+        <span>New here?</span>
+        <a href="register.html">Create an account</a>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="toast.js"></script>
+  <script src="auth-trail.js"></script>
+  <script>
+    document.addEventListener('mousemove', e => {
+      document.body.style.setProperty('--cx', e.clientX + 'px');
+      document.body.style.setProperty('--cy', e.clientY + 'px');
+    });
+  </script>
+</body>
 </html>
