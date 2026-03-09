@@ -2,87 +2,400 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - MindMate AI</title>
+  <title>Login – MindMate AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── full-screen canvas "video" background ── */
+    #bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* ── frosted card ── */
+    .card {
+      position: relative;
+      z-index: 10;
+      width: 380px;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(22px) saturate(1.4);
+      -webkit-backdrop-filter: blur(22px) saturate(1.4);
+      border-radius: 24px;
+      padding: 44px 40px 40px;
+      border: 1px solid rgba(255,255,255,0.38);
+      box-shadow:
+        0 2px 0 rgba(255,255,255,0.55) inset,
+        0 30px 70px rgba(30,20,80,0.22);
+      animation: cardIn 0.7s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(30px) scale(0.95); }
+      to   { opacity:1; transform: translateY(0)     scale(1);    }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.2));
+      border: 1px solid rgba(255,255,255,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 12px;
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%,100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+      50%      { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      letter-spacing: -0.01em;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+      margin-top: 3px;
+    }
+
+    /* inputs */
+    .field {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    }
+
+    .field input::placeholder { color: rgba(255,255,255,0.6); }
+
+    .field input:focus {
+      background: rgba(255,255,255,0.28);
+      border-color: rgba(255,255,255,0.7);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+      transform: translateY(-1px);
+    }
+
+    /* row */
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 0 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .row label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+    .row input[type=checkbox] { accent-color: white; width:14px; height:14px; }
+    .row a { color: rgba(255,255,255,0.85); text-decoration:none; }
+    .row a:hover { text-decoration:underline; }
+
+    /* checkbox standalone */
+    .check-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: rgba(255,255,255,0.75);
+      margin-bottom: 20px; cursor: pointer;
+    }
+    .check-row input { accent-color: white; width:14px; height:14px; }
+
+    /* button */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.92);
+      color: #3d2f70;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.5) 50%, transparent 65%);
+      transform: translateX(-120%);
+      transition: transform 0.5s ease;
+    }
+    .btn:hover::after { transform: translateX(120%); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,0,0,0.18); }
+    .btn:active { transform: scale(0.98); }
+
+    .switch {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.72);
+    }
+    .switch a { color: white; font-weight: 600; text-decoration: none; }
+    .switch a:hover { text-decoration: underline; }
+
+    /* cursor ripple */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%,-50%) scale(0);
+      background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 70%);
+      animation: rippleOut 0.9s ease-out forwards;
+    }
+    @keyframes rippleOut {
+      to { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+    }
+
+    /* toasts */
+    .toast-container { position:fixed; top:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:9999; }
+    .toast {
+      padding:12px 18px; border-radius:12px; font-size:14px; font-family:'Nunito',sans-serif;
+      background:rgba(255,255,255,0.9); color:#2d2060; border:1px solid rgba(255,255,255,0.5);
+      box-shadow:0 8px 30px rgba(0,0,0,0.14);
+      opacity:0; transform:translateY(-8px) scale(0.96);
+      animation:toastIn 0.35s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    .toast.success { border-left:4px solid #4ade80; }
+    .toast.error   { border-left:4px solid #f87171; }
+    .toast.info    { border-left:4px solid #a78bfa; }
+    @keyframes toastIn  { to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes toastOut { to { opacity:0; transform:translateY(-8px) scale(0.96); } }
+  </style>
 </head>
 <body>
 
-  <!-- Layered background scene -->
-  <div class="bg-scene"></div>
-  <div class="grain"></div>
+<canvas id="bg"></canvas>
 
-  <!-- Floating botanical petals -->
-  <span class="petal" style="--lx:5%;  --sz:18px; --dur:22s; --delay:0s;   --sway:35px">🌸</span>
-  <span class="petal" style="--lx:14%; --sz:14px; --dur:19s; --delay:3s;   --sway:-28px">✿</span>
-  <span class="petal" style="--lx:25%; --sz:20px; --dur:25s; --delay:6s;   --sway:40px">🍃</span>
-  <span class="petal" style="--lx:38%; --sz:13px; --dur:17s; --delay:1.5s; --sway:-22px">✦</span>
-  <span class="petal" style="--lx:52%; --sz:22px; --dur:28s; --delay:4s;   --sway:50px">🌿</span>
-  <span class="petal" style="--lx:63%; --sz:15px; --dur:20s; --delay:8s;   --sway:-35px">❀</span>
-  <span class="petal" style="--lx:74%; --sz:17px; --dur:23s; --delay:2s;   --sway:28px">🌸</span>
-  <span class="petal" style="--lx:83%; --sz:12px; --dur:16s; --delay:5s;   --sway:-18px">⋆</span>
-  <span class="petal" style="--lx:91%; --sz:19px; --dur:21s; --delay:9s;   --sway:42px">✿</span>
-  <span class="petal" style="--lx:97%; --sz:14px; --dur:18s; --delay:11s;  --sway:-30px">🍃</span>
-
-  <div class="auth-container">
-
-    <!-- Left -->
-    <div class="auth-left">
-      <div class="auth-left-inner">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;">
-          <div class="illust-ring"></div>
-          <div class="illust-ring" style="animation-delay:0.6s"></div>
-          <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MindMate">
-        </div>
-        <div class="auth-brand">
-          <h3>MindMate AI</h3>
-          <p>Your calm space to think &amp; grow</p>
-        </div>
-        <div class="auth-pills">
-          <span class="auth-pill" style="--pd:0.3s">🌿 Be present</span>
-          <span class="auth-pill" style="--pd:0.4s">💜 You matter</span>
-          <span class="auth-pill" style="--pd:0.5s">✦ Breathe</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right -->
-    <div class="auth-right">
-      <h2>Welcome back to <span>MindMate AI</span> 🌿</h2>
-
-      <div class="input-wrap" style="--iw-delay:0.28s">
-        <input type="email" id="email" placeholder="Your email address" autocomplete="email">
-      </div>
-      <div class="input-wrap" style="--iw-delay:0.34s">
-        <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
-      </div>
-
-      <div class="remember-row">
-        <label class="checkbox-row">
-          <input type="checkbox">
-          <span>Remember me</span>
-        </label>
-        <a href="#">Forgot password?</a>
-      </div>
-
-      <button class="auth-btn" onclick="login()">Sign In →</button>
-
-      <div class="auth-link">
-        <span>New here?</span>
-        <a href="register.html">Create an account</a>
-      </div>
-    </div>
-
+<div class="card">
+  <div class="brand">
+    <div class="brand-dot">🌿</div>
+    <h1>MindMate AI</h1>
+    <p>Welcome back — take a breath</p>
   </div>
 
-  <script src="auth.js"></script>
-  <script src="toast.js"></script>
-  <script src="auth-trail.js"></script>
-  <script>
-    document.addEventListener('mousemove', e => {
-      document.body.style.setProperty('--cx', e.clientX + 'px');
-      document.body.style.setProperty('--cy', e.clientY + 'px');
-    });
-  </script>
+  <div class="field">
+    <input type="email" id="email" placeholder="Email address" autocomplete="email">
+  </div>
+  <div class="field">
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+  </div>
+
+  <div class="row">
+    <label><input type="checkbox"> Remember me</label>
+    <a href="#">Forgot password?</a>
+  </div>
+
+  <button class="btn" onclick="login()">Sign In</button>
+
+  <div class="switch">
+    New here? <a href="register.html">Create an account</a>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="toast.js"></script>
+<script>
+/* ============================================================
+   LIVING BACKGROUND — Aurora waves + drifting orbs + stars
+   Inspired by: deep ocean bioluminescence at night
+   ============================================================ */
+const canvas = document.getElementById('bg');
+const ctx    = canvas.getContext('2d');
+
+let W, H, t = 0;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ── colour palette: deep teal/indigo ocean night ── */
+const PALETTE = [
+  [  8,  20,  60],  // deep navy
+  [ 10,  40,  80],  // ocean deep
+  [ 15,  60, 100],  // teal night
+  [ 12,  30,  70],  // midnight
+];
+
+/* ── floating luminous orbs ── */
+const ORBS = Array.from({length: 18}, () => ({
+  x:  Math.random(),
+  y:  Math.random(),
+  r:  60 + Math.random() * 140,
+  spd: 0.00015 + Math.random() * 0.0002,
+  off: Math.random() * Math.PI * 2,
+  h:  160 + Math.random() * 80,   // hue: teal→green→cyan
+  a:  0.06 + Math.random() * 0.10,
+}));
+
+/* ── tiny drifting particles (plankton) ── */
+const PARTICLES = Array.from({length: 80}, () => ({
+  x:  Math.random() * 1,
+  y:  Math.random() * 1,
+  vy: 0.0001 + Math.random() * 0.0002,
+  vx: (Math.random() - 0.5) * 0.00008,
+  r:  0.8 + Math.random() * 2.2,
+  a:  0.3 + Math.random() * 0.5,
+  h:  170 + Math.random() * 60,
+  flicker: Math.random() * Math.PI * 2,
+}));
+
+/* ── flowing wave layers ── */
+function drawWaves() {
+  const layers = [
+    { amp: 0.06, freq: 1.4, spd: 0.0006, y: 0.62, alpha: 0.18, h: 195 },
+    { amp: 0.05, freq: 1.8, spd: 0.0009, y: 0.68, alpha: 0.15, h: 210 },
+    { amp: 0.04, freq: 2.2, spd: 0.0012, y: 0.74, alpha: 0.12, h: 185 },
+    { amp: 0.07, freq: 0.9, spd: 0.0004, y: 0.55, alpha: 0.10, h: 220 },
+  ];
+
+  layers.forEach(l => {
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 3) {
+      const nx = x / W;
+      const wave =
+        Math.sin(nx * l.freq * Math.PI * 2 + t * l.spd * 60000) * l.amp +
+        Math.sin(nx * l.freq * 1.6 * Math.PI * 2 + t * l.spd * 40000 + 1) * l.amp * 0.5;
+      ctx.lineTo(x, H * (l.y + wave));
+    }
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    const grad = ctx.createLinearGradient(0, H * l.y, 0, H);
+    grad.addColorStop(0, `hsla(${l.h}, 65%, 55%, ${l.alpha})`);
+    grad.addColorStop(1, `hsla(${l.h}, 55%, 35%, 0)`);
+    ctx.fillStyle = grad;
+    ctx.fill();
+  });
+}
+
+/* ── cursor ripple on click/move ── */
+let mouse = { x: W/2, y: H/2 };
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+document.addEventListener('click', e => {
+  const d = document.createElement('div');
+  d.className = 'ripple';
+  d.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;width:120px;height:120px;`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 900);
+});
+
+/* ── cursor glow that follows mouse ── */
+let cursorGlow = { x: W/2, y: H/2 };
+
+/* ── main render loop ── */
+function draw(ts) {
+  t = ts * 0.001;
+
+  /* lerp cursor glow */
+  cursorGlow.x += (mouse.x - cursorGlow.x) * 0.06;
+  cursorGlow.y += (mouse.y - cursorGlow.y) * 0.06;
+
+  /* 1. deep base gradient — slowly shifts */
+  const shift = (Math.sin(t * 0.08) + 1) / 2;
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0,   `hsl(${220 + shift*20}, 55%, ${8 + shift*4}%)`);
+  bg.addColorStop(0.45,`hsl(${200 + shift*15}, 50%, ${12 + shift*3}%)`);
+  bg.addColorStop(1,   `hsl(${230 + shift*10}, 48%, ${7  + shift*2}%)`);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* 2. floating aurora blobs */
+  ORBS.forEach(o => {
+    const px = (o.x + Math.sin(t * o.spd * 60 + o.off) * 0.12) * W;
+    const py = (o.y + Math.cos(t * o.spd * 45 + o.off) * 0.09) * H;
+    const pulse = 1 + Math.sin(t * 0.4 + o.off) * 0.12;
+    const rad = ctx.createRadialGradient(px, py, 0, px, py, o.r * pulse);
+    rad.addColorStop(0,   `hsla(${o.h}, 70%, 60%, ${o.a})`);
+    rad.addColorStop(0.5, `hsla(${o.h+15}, 60%, 50%, ${o.a * 0.4})`);
+    rad.addColorStop(1,   `hsla(${o.h+30}, 50%, 40%, 0)`);
+    ctx.beginPath();
+    ctx.arc(px, py, o.r * pulse, 0, Math.PI * 2);
+    ctx.fillStyle = rad;
+    ctx.fill();
+  });
+
+  /* 3. wave layers */
+  drawWaves();
+
+  /* 4. cursor glow bloom */
+  const cgr = ctx.createRadialGradient(cursorGlow.x, cursorGlow.y, 0, cursorGlow.x, cursorGlow.y, 180);
+  cgr.addColorStop(0,   'rgba(140, 210, 255, 0.10)');
+  cgr.addColorStop(0.5, 'rgba(100, 180, 230, 0.04)');
+  cgr.addColorStop(1,   'transparent');
+  ctx.beginPath();
+  ctx.arc(cursorGlow.x, cursorGlow.y, 180, 0, Math.PI * 2);
+  ctx.fillStyle = cgr;
+  ctx.fill();
+
+  /* 5. drifting bioluminescent particles */
+  PARTICLES.forEach(p => {
+    p.x += p.vx;
+    p.y -= p.vy;
+    p.flicker += 0.04;
+    if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+    if (p.x < 0 || p.x > 1) p.vx *= -1;
+    const flick = 0.5 + Math.sin(p.flicker) * 0.5;
+    ctx.beginPath();
+    ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.h}, 80%, 75%, ${p.a * flick})`;
+    ctx.fill();
+  });
+
+  /* 6. top vignette for depth */
+  const vig = ctx.createLinearGradient(0, 0, 0, H * 0.35);
+  vig.addColorStop(0, 'rgba(5,12,40,0.55)');
+  vig.addColorStop(1, 'transparent');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+
 </body>
 </html>
