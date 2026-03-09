@@ -5,7 +5,6 @@
      send button (which is bottom-right)
    - Audio state is truly uniform: the FAB reflects the stored
      preference immediately on every page load, no flicker
-   - Sidebar #audioToggle is kept in sync with the FAB
    ============================================================ */
 
 (function () {
@@ -100,17 +99,7 @@
         fab.classList.remove('mm-fab--active');
       }
     }
-    /* sidebar button (exists on dashboard / info pages) */
-    const sb = document.getElementById('audioToggle');
-    if (sb) {
-      if (isPlaying) {
-        sb.textContent = '🔊 Audio Playing';
-        sb.classList.add('audio-on');
-      } else {
-        sb.textContent = '🎧 Calm Audio';
-        sb.classList.remove('audio-on');
-      }
-    }
+
   }
 
   /* ── inject the FAB (bottom-LEFT, away from chat send btn) ── */
@@ -121,7 +110,7 @@
     style.textContent = `
       #mm-audio-fab {
         position: fixed;
-        bottom: 24px;
+        bottom: 108px;
         left: 24px;           /* LEFT side — never overlaps send button */
         z-index: 9998;
         display: flex;
@@ -160,29 +149,6 @@
       .mm-fab-icon { font-size:15px; line-height:1; display:flex; align-items:center; }
       .mm-fab--active .mm-fab-icon { animation: mm-pulse 2s ease-in-out infinite; }
       @keyframes mm-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-
-      #audioToggle {
-        padding: 8px 12px;
-        border-radius: 8px;
-        background: rgba(139,124,246,0.1);
-        border: 1px solid rgba(139,124,246,0.25);
-        color: #7c6ee6;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        margin-bottom: 16px;
-        font-family: inherit;
-        text-align: left;
-      }
-      #audioToggle:hover {
-        background: rgba(139,124,246,0.2);
-        transform: translateY(-1px);
-      }
-      #audioToggle.audio-on {
-        background: linear-gradient(135deg,rgba(124,110,230,0.22),rgba(145,132,255,0.16));
-        border-color: rgba(139,124,246,0.5);
-        box-shadow: 0 2px 10px rgba(124,110,230,0.18);
-      }
     `;
     document.head.appendChild(style);
 
@@ -195,13 +161,6 @@
     syncAllUI(); /* render correct state immediately */
   }
 
-  /* ── wire sidebar #audioToggle if present ── */
-  function wireSidebar() {
-    const sb = document.getElementById('audioToggle');
-    if (!sb) return;
-    sb.addEventListener('click', () => isPlaying ? fadeOut() : fadeIn());
-    syncAllUI();
-  }
 
   /* ── init ── */
   function init() {
@@ -209,7 +168,6 @@
     isPlaying = localStorage.getItem('mm_audio') === 'on';
 
     injectFAB();
-    wireSidebar();
 
     /* If preference was ON, start audio on first user interaction */
     if (isPlaying) {
