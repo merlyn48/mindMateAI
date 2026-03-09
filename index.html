@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="chat.css">
-    <style> #mm-audio-fab { display: none !important; } </style>
 </head>
 <body>
 
@@ -20,7 +19,11 @@
     <div class="app-container">
 
         <aside class="sidebar">
-            <h2 class="logo">MindMate AI</h2>
+
+            <!-- Logo links back to dashboard -->
+            <a href="dashboard.html" class="logo-link">
+                <h2 class="logo">MindMate AI</h2>
+            </a>
 
             <!-- Profile -->
             <div class="sidebar-profile">
@@ -38,17 +41,12 @@
                 <ul id="historyList"></ul>
             </div>
 
-            <!-- Dashboard link -->
-            <nav class="nav-main" style="margin-top:16px;">
-                <a href="dashboard.html">Dashboard</a>
-            </nav>
-
             <!-- Footer -->
             <div class="sidebar-footer">
-                <button id="audioToggle" class="theme-toggle">🎧 Calm Audio</button>
                 <button id="themeToggle" class="theme-toggle">🌙 Dark Mode</button>
                 <button onclick="logout()" class="logout-btn">Logout</button>
             </div>
+
         </aside>
 
         <!-- Chat area -->
