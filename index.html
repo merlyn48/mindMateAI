@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>MindMate AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="chat.css">
 </head>
-
 <body>
 
-    <!-- 🔒 LOGIN PROTECTION -->
     <script>
         if (!localStorage.getItem("loggedInUser")) {
             window.location.href = "login.html";
@@ -24,46 +18,53 @@
 
     <div class="app-container">
 
-        <!-- Sidebar -->
         <aside class="sidebar">
             <h2 class="logo">MindMate AI</h2>
+
+            <!-- Profile -->
             <div class="sidebar-profile">
-
                 <img id="sidebarAvatar" class="sidebar-avatar">
-
                 <div class="sidebar-user">
-
                     <span id="sidebarName"></span>
-
-                </div>
-
-            </div>
-            <div>
-                <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
-                <br>
-                <br>
-                <div class="chat-history">
-                    <h4 style="padding-bottom: 15px;">Recent Chats</h4>
-                    <ul id="historyList"></ul>
                 </div>
             </div>
 
-            <!-- Bottom buttons -->
+            <!-- New chat + history -->
+            <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
+
+            <div class="chat-history">
+                <h4>Recent Chats</h4>
+                <ul id="historyList"></ul>
+            </div>
+
+            <!-- Nav links — so user can leave chat -->
+            <nav class="nav-main" style="margin-top:16px;">
+                <a href="dashboard.html">Dashboard</a>
+            </nav>
+
+            <nav class="nav-secondary">
+                <a href="profile.html">Profile</a>
+                <a href="settings.html">Settings</a>
+            </nav>
+
+            <nav class="nav-info">
+                <a href="about.html">About</a>
+                <a href="faq.html">FAQ</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy</a>
+            </nav>
+
+            <!-- Footer -->
             <div class="sidebar-footer">
                 <button id="themeToggle" class="theme-toggle">🌙 Dark Mode</button>
-
-                <button onclick="logout()" class="logout-btn">
-                    Logout
-                </button>
+                <button onclick="logout()" class="logout-btn">Logout</button>
             </div>
-
         </aside>
 
-        <!-- Chat Section -->
+        <!-- Chat area -->
         <main class="chat-section">
 
             <div id="welcomeScreen" class="welcome-screen">
-                <br>
                 <h1>How can I support you today?</h1>
                 <p>AI-powered student counselling assistant</p>
                 <br>
@@ -91,15 +92,11 @@
         </main>
     </div>
 
-    <!-- 🔐 Auth logic first -->
     <script src="auth.js"></script>
-
-    <!-- 💬 Chat logic -->
     <script src="script.js"></script>
     <script src="sidebar.js"></script>
     <script src="toast.js"></script>
-<script src="audio.js"></script>
-<script src="effects.js"></script>
+    <script src="audio.js"></script>
+    <script src="effects.js"></script>
 </body>
-
 </html>
