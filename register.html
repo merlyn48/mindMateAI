@@ -2,86 +2,358 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Register - MindMate AI</title>
+  <title>Register – MindMate AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 10;
+      width: 400px;
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(24px) saturate(1.4);
+      -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      border-radius: 24px;
+      padding: 40px 40px 36px;
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow:
+        0 2px 0 rgba(255,255,255,0.5) inset,
+        0 30px 70px rgba(20,30,60,0.28);
+      animation: cardIn 0.7s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(28px) scale(0.96); }
+      to   { opacity:1; transform: translateY(0)     scale(1);    }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .brand-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.18));
+      border: 1px solid rgba(255,255,255,0.45);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 12px;
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%,100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(255,255,255,0.3); }
+      50%      { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+    }
+
+    .brand h1 { font-size:20px; font-weight:600; color:white; letter-spacing:-0.01em; text-shadow:0 1px 8px rgba(0,0,0,0.2); }
+    .brand p  { font-size:13px; color:rgba(255,255,255,0.72); margin-top:3px; }
+
+    .field { position:relative; margin-bottom:12px; }
+
+    .field input {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.32);
+      background: rgba(255,255,255,0.18);
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.58); }
+    .field input:focus {
+      background: rgba(255,255,255,0.26);
+      border-color: rgba(255,255,255,0.68);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
+      transform: translateY(-1px);
+    }
+    .field input:hover:not(:focus) {
+      border-color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.22);
+    }
+
+    .check-row {
+      display:flex; align-items:center; gap:8px;
+      font-size:13px; color:rgba(255,255,255,0.7);
+      margin: 8px 0 18px; cursor:pointer;
+    }
+    .check-row input { accent-color:white; width:14px; height:14px; cursor:pointer; }
+
+    .btn {
+      width:100%; padding:14px; border-radius:12px; border:none;
+      background: rgba(255,255,255,0.90);
+      color: #1e3050;
+      font-family:'Nunito',sans-serif; font-size:15px; font-weight:700;
+      cursor:pointer; letter-spacing:0.01em;
+      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+      box-shadow:0 4px 18px rgba(0,0,0,0.15);
+      position:relative; overflow:hidden;
+    }
+    .btn::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.45) 50%,transparent 65%);
+      transform:translateX(-120%); transition:transform 0.5s ease;
+    }
+    .btn:hover::after { transform:translateX(120%); }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(0,0,0,0.2); }
+    .btn:active { transform:scale(0.98); }
+
+    .switch { text-align:center; margin-top:18px; font-size:13px; color:rgba(255,255,255,0.7); }
+    .switch a { color:white; font-weight:600; text-decoration:none; }
+    .switch a:hover { text-decoration:underline; }
+
+    .ripple {
+      position:fixed; border-radius:50%; pointer-events:none; z-index:9999;
+      transform:translate(-50%,-50%) scale(0);
+      background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 70%);
+      animation:rippleOut 0.9s ease-out forwards;
+    }
+    @keyframes rippleOut { to { transform:translate(-50%,-50%) scale(1); opacity:0; } }
+
+    .toast-container { position:fixed; top:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:9999; }
+    .toast {
+      padding:12px 18px; border-radius:12px; font-size:14px; font-family:'Nunito',sans-serif;
+      background:rgba(255,255,255,0.9); color:#1e3050;
+      border:1px solid rgba(255,255,255,0.5); box-shadow:0 8px 30px rgba(0,0,0,0.14);
+      opacity:0; transform:translateY(-8px) scale(0.96);
+      animation:toastIn 0.35s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    .toast.success { border-left:4px solid #4ade80; }
+    .toast.error   { border-left:4px solid #f87171; }
+    .toast.info    { border-left:4px solid #7dd3fc; }
+    @keyframes toastIn  { to { opacity:1; transform:translateY(0) scale(1); } }
+    @keyframes toastOut { to { opacity:0; transform:translateY(-8px) scale(0.96); } }
+  </style>
 </head>
 <body>
 
-  <div class="bg-scene"></div>
-  <div class="grain"></div>
+<canvas id="bg"></canvas>
 
-  <!-- Different petal mix for variety -->
-  <span class="petal" style="--lx:3%;  --sz:16px; --dur:20s; --delay:0s;   --sway:28px">🌺</span>
-  <span class="petal" style="--lx:12%; --sz:20px; --dur:24s; --delay:4s;   --sway:-40px">🍃</span>
-  <span class="petal" style="--lx:22%; --sz:13px; --dur:18s; --delay:2s;   --sway:32px">✧</span>
-  <span class="petal" style="--lx:35%; --sz:21px; --dur:27s; --delay:7s;   --sway:-45px">🌸</span>
-  <span class="petal" style="--lx:48%; --sz:14px; --dur:16s; --delay:1s;   --sway:25px">❋</span>
-  <span class="petal" style="--lx:59%; --sz:18px; --dur:22s; --delay:5s;   --sway:-30px">🌿</span>
-  <span class="petal" style="--lx:70%; --sz:12px; --dur:19s; --delay:9s;   --sway:36px">✿</span>
-  <span class="petal" style="--lx:80%; --sz:22px; --dur:26s; --delay:3s;   --sway:-50px">🌺</span>
-  <span class="petal" style="--lx:89%; --sz:15px; --dur:21s; --delay:6s;   --sway:22px">⊹</span>
-  <span class="petal" style="--lx:96%; --sz:17px; --dur:23s; --delay:12s;  --sway:-38px">🍃</span>
-
-  <div class="auth-container">
-
-    <!-- Left -->
-    <div class="auth-left" style="background: linear-gradient(145deg, #b8d4f5 0%, #c4b8f8 45%, #f5c8d8 100%);">
-      <div class="auth-left-inner">
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;">
-          <div class="illust-ring"></div>
-          <div class="illust-ring" style="animation-delay:0.6s"></div>
-          <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="MindMate">
-        </div>
-        <div class="auth-brand">
-          <h3>Join MindMate AI</h3>
-          <p>Start your wellbeing journey today</p>
-        </div>
-        <div class="auth-pills">
-          <span class="auth-pill" style="--pd:0.3s">🌸 Find calm</span>
-          <span class="auth-pill" style="--pd:0.4s">🧠 Grow stronger</span>
-          <span class="auth-pill" style="--pd:0.5s">✨ Thrive</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right -->
-    <div class="auth-right">
-      <h2>Create your <span>safe space</span> 🌱</h2>
-
-      <div class="input-wrap" style="--iw-delay:0.25s">
-        <input type="text" id="name" placeholder="Your name" autocomplete="name">
-      </div>
-      <div class="input-wrap" style="--iw-delay:0.31s">
-        <input type="email" id="email" placeholder="Your email address" autocomplete="email">
-      </div>
-      <div class="input-wrap" style="--iw-delay:0.37s">
-        <input type="password" id="password" placeholder="Create a password" autocomplete="new-password">
-      </div>
-
-      <label class="checkbox-row">
-        <input type="checkbox">
-        I agree to Terms &amp; Conditions and Privacy Policy
-      </label>
-
-      <button class="auth-btn" onclick="register()">Get Started →</button>
-
-      <div class="auth-link">
-        <span>Already have an account?</span>
-        <a href="login.html">Sign in</a>
-      </div>
-    </div>
-
+<div class="card">
+  <div class="brand">
+    <div class="brand-dot">🌱</div>
+    <h1>MindMate AI</h1>
+    <p>Your journey to wellness starts here</p>
   </div>
 
-  <script src="auth.js"></script>
-  <script src="toast.js"></script>
-  <script src="auth-trail.js"></script>
-  <script>
-    document.addEventListener('mousemove', e => {
-      document.body.style.setProperty('--cx', e.clientX + 'px');
-      document.body.style.setProperty('--cy', e.clientY + 'px');
-    });
-  </script>
+  <div class="field">
+    <input type="text" id="name" placeholder="Your name" autocomplete="name">
+  </div>
+  <div class="field">
+    <input type="email" id="email" placeholder="Email address" autocomplete="email">
+  </div>
+  <div class="field">
+    <input type="password" id="password" placeholder="Create a password" autocomplete="new-password">
+  </div>
+
+  <label class="check-row">
+    <input type="checkbox">
+    I agree to the Terms &amp; Conditions and Privacy Policy
+  </label>
+
+  <button class="btn" onclick="register()">Create Account</button>
+
+  <div class="switch">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="toast.js"></script>
+<script>
+/* ============================================================
+   LIVING BACKGROUND — Sunrise over a misty meadow
+   Warm amber glow rising through soft fog layers + fireflies
+   ============================================================ */
+const canvas = document.getElementById('bg');
+const ctx    = canvas.getContext('2d');
+let W, H, t = 0;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+/* ── fireflies / pollen ── */
+const FLIES = Array.from({length: 55}, () => ({
+  x:   Math.random(),
+  y:   Math.random(),
+  vx:  (Math.random() - 0.5) * 0.00012,
+  vy:  -(0.00005 + Math.random() * 0.00012),
+  r:   1 + Math.random() * 2.5,
+  a:   0.4 + Math.random() * 0.5,
+  h:   40 + Math.random() * 50,   /* amber → gold → yellow-green */
+  flk: Math.random() * Math.PI * 2,
+  fspd:0.03 + Math.random() * 0.05,
+}));
+
+/* ── soft cloud layers ── */
+const CLOUDS = Array.from({length: 6}, () => ({
+  x:   Math.random(),
+  y:   0.25 + Math.random() * 0.3,
+  w:   0.18 + Math.random() * 0.28,
+  h:   0.06 + Math.random() * 0.10,
+  spd: 0.000025 + Math.random() * 0.00003,
+  a:   0.06 + Math.random() * 0.09,
+}));
+
+let mouse = { x: W/2, y: H/2 };
+let glow  = { x: W/2, y: H/2 };
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+document.addEventListener('click', e => {
+  const d = document.createElement('div');
+  d.className = 'ripple';
+  d.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;width:100px;height:100px;`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 900);
+});
+
+function drawGround() {
+  /* rolling hills silhouette */
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  const segs = 120;
+  for (let i = 0; i <= segs; i++) {
+    const nx = i / segs;
+    const ny = 0.72
+      + Math.sin(nx * Math.PI * 2.4 + t * 0.05) * 0.04
+      + Math.sin(nx * Math.PI * 4.8 + t * 0.03) * 0.02
+      + Math.sin(nx * Math.PI * 1.1 + 1.5)       * 0.05;
+    ctx.lineTo(nx * W, ny * H);
+  }
+  ctx.lineTo(W, H);
+  const grd = ctx.createLinearGradient(0, H * 0.7, 0, H);
+  grd.addColorStop(0, 'rgba(34, 55, 28, 0.85)');
+  grd.addColorStop(1, 'rgba(18, 30, 16, 0.95)');
+  ctx.fillStyle = grd;
+  ctx.fill();
+}
+
+function drawMist() {
+  /* three soft mist bands at horizon */
+  const bands = [
+    { y: 0.65, h: 0.12, a: 0.18, col: [255, 230, 180] },
+    { y: 0.60, h: 0.10, a: 0.10, col: [255, 220, 160] },
+    { y: 0.55, h: 0.08, a: 0.07, col: [240, 200, 150] },
+  ];
+  bands.forEach(b => {
+    const g = ctx.createLinearGradient(0, b.y * H, 0, (b.y + b.h) * H);
+    g.addColorStop(0, `rgba(${b.col},0)`);
+    g.addColorStop(0.4, `rgba(${b.col},${b.a})`);
+    g.addColorStop(1,   `rgba(${b.col},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, b.y * H, W, b.h * H);
+  });
+}
+
+function draw(ts) {
+  t = ts * 0.001;
+  glow.x += (mouse.x - glow.x) * 0.05;
+  glow.y += (mouse.y - glow.y) * 0.05;
+
+  const sunCycle = (Math.sin(t * 0.04) + 1) / 2; /* 0→1 slow pulse */
+
+  /* 1. Sky gradient — warm sunrise palette */
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0,    `hsl(${215 + sunCycle*15}, 45%, ${12 + sunCycle*5}%)`);
+  sky.addColorStop(0.35, `hsl(${30  + sunCycle*10}, 55%, ${22 + sunCycle*8}%)`);
+  sky.addColorStop(0.60, `hsl(${35  + sunCycle*5},  70%, ${38 + sunCycle*10}%)`);
+  sky.addColorStop(0.75, `hsl(${40  + sunCycle*5},  60%, ${28 + sunCycle*6}%)`);
+  sky.addColorStop(1,    `hsl(${200}, 30%, 8%)`);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  /* 2. Sun glow on horizon */
+  const sunX = W * (0.45 + Math.sin(t * 0.02) * 0.05);
+  const sunY = H * (0.58 + Math.sin(t * 0.015) * 0.02);
+  const sunRad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, W * 0.38);
+  sunRad.addColorStop(0,   `rgba(255, 220, 140, ${0.22 + sunCycle * 0.12})`);
+  sunRad.addColorStop(0.3, `rgba(255, 180,  80, ${0.14 + sunCycle * 0.08})`);
+  sunRad.addColorStop(0.7, `rgba(220, 130,  50, ${0.06})`);
+  sunRad.addColorStop(1,   'transparent');
+  ctx.beginPath();
+  ctx.arc(sunX, sunY, W * 0.38, 0, Math.PI * 2);
+  ctx.fillStyle = sunRad;
+  ctx.fill();
+
+  /* 3. Soft cloud shapes */
+  CLOUDS.forEach(c => {
+    c.x = (c.x + c.spd) % 1.3;
+    const cx = c.x * W, cy = c.y * H;
+    const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.w * W);
+    cg.addColorStop(0,   `rgba(255,235,200,${c.a})`);
+    cg.addColorStop(0.5, `rgba(255,220,170,${c.a*0.5})`);
+    cg.addColorStop(1,   'transparent');
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, c.w * W, c.h * H, 0, 0, Math.PI * 2);
+    ctx.fillStyle = cg;
+    ctx.fill();
+  });
+
+  /* 4. Ground + mist */
+  drawGround();
+  drawMist();
+
+  /* 5. Cursor warmth bloom */
+  const cgr = ctx.createRadialGradient(glow.x, glow.y, 0, glow.x, glow.y, 160);
+  cgr.addColorStop(0,   'rgba(255, 210, 120, 0.09)');
+  cgr.addColorStop(0.6, 'rgba(255, 180,  80, 0.04)');
+  cgr.addColorStop(1,   'transparent');
+  ctx.beginPath();
+  ctx.arc(glow.x, glow.y, 160, 0, Math.PI * 2);
+  ctx.fillStyle = cgr;
+  ctx.fill();
+
+  /* 6. Fireflies */
+  FLIES.forEach(f => {
+    f.x += f.vx; f.y += f.vy; f.flk += f.fspd;
+    if (f.y < -0.02) { f.y = 0.85 + Math.random() * 0.1; f.x = Math.random(); }
+    if (f.x < 0 || f.x > 1) f.vx *= -1;
+    const flick = (Math.sin(f.flk) + 1) / 2;
+    if (flick < 0.3) return; /* off phase */
+    ctx.beginPath();
+    ctx.arc(f.x * W, f.y * H, f.r * flick, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${f.h}, 85%, 75%, ${f.a * flick})`;
+    ctx.shadowBlur = 6 * flick;
+    ctx.shadowColor = `hsla(${f.h}, 85%, 75%, 0.5)`;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  /* 7. Top darkness vignette */
+  const vig = ctx.createLinearGradient(0, 0, 0, H * 0.28);
+  vig.addColorStop(0, 'rgba(8,12,28,0.5)');
+  vig.addColorStop(1, 'transparent');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+
 </body>
 </html>
