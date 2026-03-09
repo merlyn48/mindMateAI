@@ -5,17 +5,13 @@
     <meta charset="UTF-8">
     <title>Contact - MindMate AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body>
 
     <div class="app-container">
-
-        <!-- Sidebar -->
 
         <aside class="sidebar">
 
@@ -23,41 +19,26 @@
 
             <div class="sidebar-profile">
                 <img id="sidebarAvatar" class="sidebar-avatar">
-
                 <div class="sidebar-user">
                     <span id="sidebarName"></span>
                 </div>
-
             </div>
-            <button id="audioToggle">🎧 Calm Audio</button>
-
-            <!-- MAIN NAVIGATION -->
 
             <nav class="nav-main">
-
                 <a href="dashboard.html">Dashboard</a>
                 <a href="index.html">Chat</a>
-
             </nav>
-
-            <!-- ACCOUNT -->
 
             <nav class="nav-secondary">
-
                 <a href="profile.html">Profile</a>
                 <a href="settings.html">Settings</a>
-
             </nav>
 
-            <!-- WEBSITE PAGES -->
-
             <nav class="nav-info">
-
                 <a href="about.html">About</a>
                 <a href="faq.html">FAQ</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy Policy</a>
-
             </nav>
 
             <div class="sidebar-footer">
@@ -67,17 +48,13 @@
 
         </aside>
 
-        <!-- Main Content -->
-
         <main class="chat-section">
 
             <div class="page-wrapper">
 
                 <div class="page-header">
-
                     <h1>📩 Contact Us</h1>
                     <p>Have questions or feedback? We'd love to hear from you.</p>
-
                 </div>
 
                 <div class="card-box">
@@ -106,13 +83,10 @@
 
     </div>
 
-
     <script>
-
         const form = document.getElementById("contactForm");
 
         form.addEventListener("submit", async function (e) {
-
             e.preventDefault();
 
             const formData = new FormData(form);
@@ -125,27 +99,18 @@
             const result = await response.json();
 
             if (result.success) {
-
                 showToast("Message sent successfully!", "success");
-
                 form.reset();
-
             } else {
-
                 showToast("Failed to send message", "error");
-
             }
-
         });
-
     </script>
-
 
     <script src="sidebar.js"></script>
     <script src="toast.js"></script>
-
-<script src="audio.js"></script>
-<script src="effects.js"></script>
+    <script src="audio.js"></script>
+    <script src="effects.js"></script>
 </body>
 
 </html>
