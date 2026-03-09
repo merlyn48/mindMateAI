@@ -154,10 +154,11 @@ body.dark-mode::before {
 .sidebar a:hover::before { width:3px; }
 
 .logout-btn {
-  margin-top:12px;padding:9px 14px;border:1px solid rgba(239,68,68,0.2);
+  margin-top:auto;padding:9px 14px;border:1px solid rgba(239,68,68,0.2);
   background:rgba(239,68,68,0.1);color:#ef4444;border-radius:var(--r-sm);
   cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;
   transition:all 0.22s var(--ease-spring);
+  flex-shrink:0;
 }
 .logout-btn:hover { background:#ef4444;color:white;transform:translateY(-1px);box-shadow:0 4px 14px rgba(239,68,68,0.32); }
 .logout-btn:active { transform:scale(0.97); }
