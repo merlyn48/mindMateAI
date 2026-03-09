@@ -1,11 +1,7 @@
 /* ============================================================
-   MindMate AI — Global Audio Manager  v2.1
-   Fixes:
-   - FAB moves to bottom-LEFT so it never overlaps the chat
-     send button (which is bottom-right)
-   - Audio state is truly uniform: the FAB reflects the stored
-     preference immediately on every page load, no flicker
-   - Sidebar #audioToggle is kept in sync with the FAB
+   MindMate AI — Global Audio Manager  v3.0
+   Audio is now a full-width sidebar button (#audioToggle)
+   on every page — consistent, no floating pill.
    ============================================================ */
 
 (function () {
@@ -21,7 +17,6 @@
     { freq: 392.0, detune:  5 },
   ];
 
-  /* ── build Web Audio graph (once per page) ── */
   function buildAudio() {
     if (audioCtx) return;
     audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
@@ -30,7 +25,7 @@
     masterGain.connect(audioCtx.destination);
 
     const filter = audioCtx.createBiquadFilter();
-    filter.type           = 'lowpass';
+    filter.type            = 'lowpass';
     filter.frequency.value = 800;
     filter.Q.value         = 0.8;
     filter.connect(masterGain);
@@ -38,7 +33,7 @@
     NOTES.forEach(n => {
       const osc  = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type           = 'sine';
+      osc.type            = 'sine';
       osc.frequency.value = n.freq;
       osc.detune.value    = n.detune;
       gain.gain.value     = 0.06;
@@ -47,7 +42,6 @@
       osc.start();
     });
 
-    /* pink noise */
     const sr  = audioCtx.sampleRate;
     const buf = audioCtx.createBuffer(1, sr * 4, sr);
     const d   = buf.getChannelData(0);
@@ -65,7 +59,6 @@
     ns.connect(ng); ng.connect(masterGain); ns.start();
   }
 
-  /* ── fade helpers ── */
   function fadeIn() {
     if (!audioCtx) buildAudio();
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -74,7 +67,7 @@
     masterGain.gain.linearRampToValueAtTime(0.45, audioCtx.currentTime + 3.5);
     isPlaying = true;
     localStorage.setItem('mm_audio', 'on');
-    syncAllUI();
+    syncUI();
   }
 
   function fadeOut() {
@@ -84,141 +77,32 @@
     masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
     isPlaying = false;
     localStorage.setItem('mm_audio', 'off');
-    syncAllUI();
+    syncUI();
   }
 
-  /* ── keep FAB + sidebar button in sync ── */
-  function syncAllUI() {
-    /* FAB */
-    const fab = document.getElementById('mm-audio-fab');
-    if (fab) {
-      if (isPlaying) {
-        fab.innerHTML = '<span class="mm-fab-icon">🔊</span><span class="mm-fab-label">On</span>';
-        fab.classList.add('mm-fab--active');
-      } else {
-        fab.innerHTML = '<span class="mm-fab-icon">🎵</span><span class="mm-fab-label">Audio</span>';
-        fab.classList.remove('mm-fab--active');
-      }
-    }
-    /* sidebar button (exists on dashboard / info pages) */
-    const sb = document.getElementById('audioToggle');
-    if (sb) {
-      if (isPlaying) {
-        sb.textContent = '🔊 Audio Playing';
-        sb.classList.add('audio-on');
-      } else {
-        sb.textContent = '🎧 Calm Audio';
-        sb.classList.remove('audio-on');
-      }
+  function syncUI() {
+    const btn = document.getElementById('audioToggle');
+    if (!btn) return;
+    if (isPlaying) {
+      btn.textContent = '🔊 Audio On';
+      btn.classList.add('audio-on');
+    } else {
+      btn.textContent = '🎵 Calm Audio';
+      btn.classList.remove('audio-on');
     }
   }
 
-  /* ── inject the FAB (bottom-LEFT, away from chat send btn) ── */
-  function injectFAB() {
-    if (document.getElementById('mm-audio-fab')) return;
-
-    const style = document.createElement('style');
-    style.textContent = `
-      #mm-audio-fab {
-        position: fixed;
-        bottom: 160px;
-        left: 24px;
-        z-index: 9998;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 9px 14px;
-        border-radius: 10px;
-        border: 1.5px solid rgba(139,124,246,0.3);
-        background: rgba(255,255,255,0.82);
-        backdrop-filter: blur(12px) saturate(1.5);
-        -webkit-backdrop-filter: blur(12px) saturate(1.5);
-        color: #7c6ee6;
-        font-family: 'DM Sans','Inter',sans-serif;
-        font-size: 12.5px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.22s ease;
-        box-shadow: 0 2px 12px rgba(124,110,230,0.14);
-        letter-spacing: 0.01em;
-        min-width: 44px;
-      }
-      body.dark-mode #mm-audio-fab {
-        background: rgba(30,28,50,0.72);
-        border-color: rgba(156,140,255,0.4);
-        color: #c4baff;
-      }
-      #mm-audio-fab:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 18px rgba(124,110,230,0.24);
-        border-color: rgba(139,124,246,0.55);
-        background: rgba(255,255,255,0.95);
-      }
-      #mm-audio-fab.mm-fab--active {
-        background: linear-gradient(135deg,rgba(124,110,230,0.15),rgba(145,132,255,0.12));
-        border-color: rgba(139,124,246,0.55);
-        box-shadow: 0 0 0 3px rgba(124,110,230,0.10), 0 3px 14px rgba(124,110,230,0.2);
-      }
-      .mm-fab-icon { font-size:15px; line-height:1; display:flex; align-items:center; }
-      .mm-fab--active .mm-fab-icon { animation: mm-pulse 2s ease-in-out infinite; }
-      @keyframes mm-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-
-      #audioToggle {
-        padding: 8px 12px;
-        border-radius: 8px;
-        background: rgba(139,124,246,0.1);
-        border: 1px solid rgba(139,124,246,0.25);
-        color: #7c6ee6;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        margin-bottom: 16px;
-        font-family: inherit;
-        text-align: left;
-      }
-      #audioToggle:hover {
-        background: rgba(139,124,246,0.2);
-        transform: translateY(-1px);
-      }
-      #audioToggle.audio-on {
-        background: linear-gradient(135deg,rgba(124,110,230,0.22),rgba(145,132,255,0.16));
-        border-color: rgba(139,124,246,0.5);
-        box-shadow: 0 2px 10px rgba(124,110,230,0.18);
-      }
-    `;
-    document.head.appendChild(style);
-
-    const btn = document.createElement('button');
-    btn.id = 'mm-audio-fab';
-    btn.setAttribute('aria-label', 'Toggle calm ambient audio');
-    document.body.appendChild(btn);
-
-    btn.addEventListener('click', () => isPlaying ? fadeOut() : fadeIn());
-    syncAllUI(); /* render correct state immediately */
-  }
-
-  /* ── wire sidebar #audioToggle if present ── */
-  function wireSidebar() {
-    const sb = document.getElementById('audioToggle');
-    if (!sb) return;
-    sb.addEventListener('click', () => isPlaying ? fadeOut() : fadeIn());
-    syncAllUI();
-  }
-
-  /* ── init ── */
   function init() {
-    /* Reflect stored preference in UI right away (no gesture needed for UI) */
     isPlaying = localStorage.getItem('mm_audio') === 'on';
 
-    injectFAB();
-    wireSidebar();
+    const btn = document.getElementById('audioToggle');
+    if (btn) {
+      syncUI();
+      btn.addEventListener('click', () => isPlaying ? fadeOut() : fadeIn());
+    }
 
-    /* If preference was ON, start audio on first user interaction */
     if (isPlaying) {
       const startOnGesture = () => {
-        /* Only actually start if preference is still on
-           (user might have clicked the FAB before this fires) */
         if (localStorage.getItem('mm_audio') === 'on') fadeIn();
         document.removeEventListener('click',   startOnGesture);
         document.removeEventListener('keydown', startOnGesture);
