@@ -12,7 +12,30 @@
 </head>
 
 <body>
+    <div class="particles"></div>
+    <style>
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image:
+                radial-gradient(circle, #8b7cf6 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.08;
+            animation: moveParticles 60s linear infinite;
+        }
 
+        @keyframes moveParticles {
+            from {
+                transform: translateY(0)
+            }
+
+            to {
+                transform: translateY(-1000px)
+            }
+        }
+    </style>
     <!-- LOGIN PROTECTION -->
     <script>
         if (!localStorage.getItem("loggedInUser")) {
@@ -37,6 +60,7 @@
                 </div>
 
             </div>
+            <button id="audioToggle">🎧 Calm Audio</button>
 
             <!-- MAIN NAVIGATION -->
 
@@ -83,8 +107,8 @@
                 <h1>Welcome back 🌿</h1>
 
                 <p>
-                    Hello <strong id="welcomeName"></strong>, 
-                     take a moment to check in with yourself.
+                    Hello <strong id="welcomeName"></strong>,
+                    take a moment to check in with yourself.
                 </p>
 
             </header>
@@ -192,125 +216,131 @@
 
         /* USER NAME */
 
-document.getElementById("welcomeName").innerText =
-localStorage.getItem("loggedInUser");
+        document.getElementById("welcomeName").innerText =
+            localStorage.getItem("loggedInUser");
 
 
-/* ================= MOOD SYSTEM ================= */
+        /* ================= MOOD SYSTEM ================= */
 
-function setMood(mood){
+        function setMood(mood) {
+            document.querySelectorAll(".mood-buttons button")
+                .forEach(btn => btn.classList.remove("mood-selected"));
 
-localStorage.setItem("mindmate_mood", mood);
+            event.target.classList.add("mood-selected");
 
-/* save mood by day */
+            localStorage.setItem("mindmate_mood", mood);
 
-const today = new Date().getDay(); // 0-6
+            /* save mood by day */
 
-let moodWeek =
-JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
+            const today = new Date().getDay(); // 0-6
 
-moodWeek[today] = mood;
+            let moodWeek =
+                JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
 
-localStorage.setItem(
-"mindmate_week_moods",
-JSON.stringify(moodWeek)
-);
+            moodWeek[today] = mood;
 
-/* show message */
+            localStorage.setItem(
+                "mindmate_week_moods",
+                JSON.stringify(moodWeek)
+            );
 
-const responses = {
-happy:"I'm glad you're feeling good today 😊",
-okay:"Thanks for checking in. I'm here if you want to talk.",
-stressed:"I'm sorry you're feeling stressed. Maybe chatting could help.",
-sad:"That sounds tough. Remember you're not alone."
-};
+            /* show message */
 
-document.getElementById("moodResult").textContent = responses[mood];
+            const responses = {
+                happy: "I'm glad you're feeling good today 😊",
+                okay: "Thanks for checking in. I'm here if you want to talk.",
+                stressed: "I'm sorry you're feeling stressed.",
+                sad: "That sounds tough. Remember you're not alone."
+            };
 
-/* update tracker */
+            document.getElementById("moodResult").textContent = responses[mood];
 
-updateWeekTracker();
+            /* update tracker */
 
-}
+            updateWeekTracker();
 
-
-/* ================= WEEK TRACKER ================= */
-
-function updateWeekTracker(){
-
-let moods =
-JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
-
-/* mapping days to boxes */
-
-const dayMap = [7,1,2,3,4,5,6]; 
-// Sunday goes last
-
-for(let i=0;i<7;i++){
-
-let box = document.getElementById("day"+(i+1));
-
-if(!box) continue;
-
-box.className="day";
-
-/* find correct stored mood */
-
-let mood = moods[dayMap[i] % 7];
-
-if(mood){
-box.classList.add("mood-"+mood);
-}
-
-}
-
-}
+        }
 
 
-/* LOAD WHEN PAGE OPENS */
+        /* ================= WEEK TRACKER ================= */
 
-window.onload = () => {
+        function updateWeekTracker() {
 
-const mood = localStorage.getItem("mindmate_mood");
+            let moods =
+                JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
 
-if(mood){
-document.getElementById("moodResult").textContent =
-"Today's mood: " + mood;
-}
+            /* mapping days to boxes */
 
-updateWeekTracker();
+            const dayMap = [7, 1, 2, 3, 4, 5, 6];
+            // Sunday goes last
 
-};
+            for (let i = 0; i < 7; i++) {
 
-    </script>
-    <script>
+                let box = document.getElementById("day" + (i + 1));
 
-            const sidebarAvatar = document.getElementById("sidebarAvatar");
-            const sidebarName = document.getElementById("sidebarName");
+                if (!box) continue;
 
-            const user = JSON.parse(localStorage.getItem("mindmate_user"));
-            const avatar = localStorage.getItem("mindmate_avatar");
+                box.className = "day";
 
-            if (sidebarName) {
-                sidebarName.innerText = user?.name || "User";
-            }
+                /* find correct stored mood */
 
-            if (sidebarAvatar) {
+                let mood = moods[dayMap[i] % 7];
 
-                if (avatar) {
-                    sidebarAvatar.src = avatar;
-                } else {
-                    sidebarAvatar.src =
-                        "https://ui-avatars.com/api/?name=" +
-                        (user?.name || "User") +
-                        "&background=8b7cf6&color=fff";
+                if (mood) {
+                    box.classList.add("mood-" + mood);
                 }
 
             }
 
+        }
+
+
+        /* LOAD WHEN PAGE OPENS */
+
+        window.onload = () => {
+
+            const mood = localStorage.getItem("mindmate_mood");
+
+            if (mood) {
+                document.getElementById("moodResult").textContent =
+                    "Today's mood: " + mood;
+            }
+
+            updateWeekTracker();
+
+        };
+
+    </script>
+    <script>
+
+        const sidebarAvatar = document.getElementById("sidebarAvatar");
+        const sidebarName = document.getElementById("sidebarName");
+
+        const user = JSON.parse(localStorage.getItem("mindmate_user"));
+        const avatar = localStorage.getItem("mindmate_avatar");
+
+        if (sidebarName) {
+            sidebarName.innerText = user?.name || "User";
+        }
+
+        if (sidebarAvatar) {
+
+            if (avatar) {
+                sidebarAvatar.src = avatar;
+            } else {
+                sidebarAvatar.src =
+                    "https://ui-avatars.com/api/?name=" +
+                    (user?.name || "User") +
+                    "&background=8b7cf6&color=fff";
+            }
+
+        }
+
     </script>
 
     <script src="toast.js"></script>
+<script src="audio.js"></script>
+<script src="effects.js"></script>
 </body>
 
 </html>
