@@ -68,15 +68,21 @@
 
                 <div class="card-box">
 
-                    <input type="text" id="contactName" placeholder="Your Name" class="input-style">
+                    <form action="https://api.web3forms.com/submit" method="POST">
 
-                    <input type="email" id="contactEmail" placeholder="Your Email" class="input-style">
+<input type="hidden" name="access_key" value="639f2747-9168-4827-a211-de4f7ab9d818">
 
-                    <textarea id="contactMessage" placeholder="Your Message" class="input-style"></textarea>
+<input type="text" name="name" placeholder="Your Name" class="input-style" required>
 
-                    <button class="primary-btn" onclick="sendContact()">
-                        📨 Send Message
-                    </button>
+<input type="email" name="email" placeholder="Your Email" class="input-style" required>
+
+<textarea name="message" placeholder="Your Message" class="input-style" required></textarea>
+
+<button type="submit" class="primary-btn">
+📨 Send Message
+</button>
+
+</form>
 
                 </div>
 
@@ -111,8 +117,9 @@ Email: ${email}
 Message:
 ${message}`;
 
-            window.location.href =
-                `mailto:mindmateAI@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+           window.open(
+`https://mail.google.com/mail/?view=cm&fs=1&to=mindmateAI@proton.me&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+);
 
         }
 
