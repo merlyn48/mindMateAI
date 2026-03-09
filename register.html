@@ -4,149 +4,111 @@
   <meta charset="UTF-8">
   <title>Register – MindMate AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
     body {
-      font-family: 'Nunito', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family:'DM Sans',sans-serif; height:100vh; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      -webkit-font-smoothing:antialiased;
     }
-
-    #bg {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
+    #bg { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
 
     .card {
-      position: relative;
-      z-index: 10;
-      width: 400px;
-      background: rgba(255,255,255,0.16);
-      backdrop-filter: blur(24px) saturate(1.4);
-      -webkit-backdrop-filter: blur(24px) saturate(1.4);
-      border-radius: 24px;
-      padding: 40px 40px 36px;
-      border: 1px solid rgba(255,255,255,0.35);
-      box-shadow:
-        0 2px 0 rgba(255,255,255,0.5) inset,
-        0 30px 70px rgba(20,30,60,0.28);
-      animation: cardIn 0.7s cubic-bezier(.34,1.56,.64,1) both;
+      position:relative; z-index:10; width:400px;
+      background:rgba(255,255,255,0.22);
+      backdrop-filter:blur(28px) saturate(1.5);
+      -webkit-backdrop-filter:blur(28px) saturate(1.5);
+      border-radius:24px; padding:40px 40px 36px;
+      border:1px solid rgba(255,255,255,0.42);
+      box-shadow: 0 2px 0 rgba(255,255,255,0.6) inset, 0 32px 80px rgba(60,40,120,0.18);
+      animation:cardIn .65s cubic-bezier(.34,1.56,.64,1) both;
     }
+    @keyframes cardIn { from{opacity:0;transform:translateY(24px) scale(0.96)} to{opacity:1;transform:none} }
 
-    @keyframes cardIn {
-      from { opacity:0; transform: translateY(28px) scale(0.96); }
-      to   { opacity:1; transform: translateY(0)     scale(1);    }
+    .brand { text-align:center; margin-bottom:26px; }
+    .brand-icon {
+      width:52px; height:52px; border-radius:50%;
+      background:linear-gradient(135deg, rgba(124,110,230,0.35), rgba(125,213,200,0.3));
+      border:1.5px solid rgba(255,255,255,0.55);
+      display:flex; align-items:center; justify-content:center;
+      font-size:24px; margin:0 auto 14px;
+      animation:breathe 4s ease-in-out infinite;
+      box-shadow:0 4px 18px rgba(124,110,230,0.2);
     }
-
-    .brand {
-      text-align: center;
-      margin-bottom: 26px;
-    }
-
-    .brand-dot {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.18));
-      border: 1px solid rgba(255,255,255,0.45);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      margin: 0 auto 12px;
-      animation: breathe 4s ease-in-out infinite;
-    }
-
     @keyframes breathe {
-      0%,100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(255,255,255,0.3); }
-      50%      { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+      0%,100%{transform:scale(1);    box-shadow:0 4px 18px rgba(124,110,230,0.2);}
+      50%     {transform:scale(1.07); box-shadow:0 4px 28px rgba(124,110,230,0.38);}
     }
+    .brand h1 { font-size:20px; font-weight:600; letter-spacing:-0.02em; color:#2a2542; text-shadow:0 1px 0 rgba(255,255,255,0.8); }
+    .brand p  { font-size:13px; color:#7772a0; margin-top:3px; }
 
-    .brand h1 { font-size:20px; font-weight:600; color:white; letter-spacing:-0.01em; text-shadow:0 1px 8px rgba(0,0,0,0.2); }
-    .brand p  { font-size:13px; color:rgba(255,255,255,0.72); margin-top:3px; }
-
-    .field { position:relative; margin-bottom:12px; }
-
+    .field { margin-bottom:12px; }
     .field input {
-      width: 100%;
-      padding: 13px 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.32);
-      background: rgba(255,255,255,0.18);
-      color: white;
-      font-family: 'Nunito', sans-serif;
-      font-size: 14px;
-      outline: none;
-      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+      width:100%; padding:13px 15px; border-radius:12px;
+      border:1.5px solid rgba(124,110,230,0.2);
+      background:rgba(255,255,255,0.55); color:#2a2542;
+      font-family:'DM Sans',sans-serif; font-size:14px; outline:none;
+      transition:border-color .25s, box-shadow .25s, background .25s, transform .2s;
     }
-    .field input::placeholder { color: rgba(255,255,255,0.58); }
+    .field input::placeholder { color:#a09cc0; }
     .field input:focus {
-      background: rgba(255,255,255,0.26);
-      border-color: rgba(255,255,255,0.68);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
-      transform: translateY(-1px);
+      border-color:rgba(124,110,230,0.6); background:rgba(255,255,255,0.8);
+      box-shadow:0 0 0 3px rgba(124,110,230,0.12); transform:translateY(-1px);
     }
     .field input:hover:not(:focus) {
-      border-color: rgba(255,255,255,0.45);
-      background: rgba(255,255,255,0.22);
+      border-color:rgba(124,110,230,0.35); background:rgba(255,255,255,0.65);
     }
 
     .check-row {
       display:flex; align-items:center; gap:8px;
-      font-size:13px; color:rgba(255,255,255,0.7);
-      margin: 8px 0 18px; cursor:pointer;
+      font-size:13px; color:#7772a0; cursor:pointer; margin:8px 0 18px;
     }
-    .check-row input { accent-color:white; width:14px; height:14px; cursor:pointer; }
+    .check-row input { accent-color:#7c6ee6; width:14px; height:14px; }
 
     .btn {
       width:100%; padding:14px; border-radius:12px; border:none;
-      background: rgba(255,255,255,0.90);
-      color: #1e3050;
-      font-family:'Nunito',sans-serif; font-size:15px; font-weight:700;
-      cursor:pointer; letter-spacing:0.01em;
-      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
-      box-shadow:0 4px 18px rgba(0,0,0,0.15);
+      background:linear-gradient(135deg,#7c6ee6,#9184ff);
+      color:white; font-family:'DM Sans',sans-serif;
+      font-size:15px; font-weight:600; cursor:pointer;
+      transition:all .25s cubic-bezier(.34,1.56,.64,1);
+      box-shadow:0 6px 22px rgba(124,110,230,0.38);
       position:relative; overflow:hidden;
     }
     .btn::after {
       content:''; position:absolute; inset:0;
-      background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.45) 50%,transparent 65%);
-      transform:translateX(-120%); transition:transform 0.5s ease;
+      background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.28) 50%,transparent 65%);
+      transform:translateX(-120%); transition:transform .5s ease;
     }
     .btn:hover::after { transform:translateX(120%); }
-    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(0,0,0,0.2); }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(124,110,230,0.48); }
     .btn:active { transform:scale(0.98); }
 
-    .switch { text-align:center; margin-top:18px; font-size:13px; color:rgba(255,255,255,0.7); }
-    .switch a { color:white; font-weight:600; text-decoration:none; }
+    .switch { text-align:center; margin-top:18px; font-size:13px; color:#7772a0; }
+    .switch a { color:#7c6ee6; font-weight:600; text-decoration:none; }
     .switch a:hover { text-decoration:underline; }
 
     .ripple {
       position:fixed; border-radius:50%; pointer-events:none; z-index:9999;
       transform:translate(-50%,-50%) scale(0);
-      background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 70%);
-      animation:rippleOut 0.9s ease-out forwards;
+      background:radial-gradient(circle,rgba(124,110,230,0.25) 0%,transparent 70%);
+      animation:rippleOut .85s ease-out forwards;
     }
-    @keyframes rippleOut { to { transform:translate(-50%,-50%) scale(1); opacity:0; } }
+    @keyframes rippleOut { to{transform:translate(-50%,-50%) scale(1);opacity:0;} }
 
     .toast-container { position:fixed; top:20px; right:20px; display:flex; flex-direction:column; gap:10px; z-index:9999; }
     .toast {
-      padding:12px 18px; border-radius:12px; font-size:14px; font-family:'Nunito',sans-serif;
-      background:rgba(255,255,255,0.9); color:#1e3050;
-      border:1px solid rgba(255,255,255,0.5); box-shadow:0 8px 30px rgba(0,0,0,0.14);
+      padding:12px 18px; border-radius:12px; font-size:14px; font-family:'DM Sans',sans-serif;
+      background:rgba(255,255,255,0.9); backdrop-filter:blur(12px); color:#2a2542;
+      border:1px solid rgba(124,110,230,0.18); box-shadow:0 8px 30px rgba(60,40,120,0.12);
       opacity:0; transform:translateY(-8px) scale(0.96);
-      animation:toastIn 0.35s cubic-bezier(.34,1.56,.64,1) forwards;
+      animation:toastIn .35s cubic-bezier(.34,1.56,.64,1) forwards;
     }
     .toast.success { border-left:4px solid #4ade80; }
     .toast.error   { border-left:4px solid #f87171; }
-    .toast.info    { border-left:4px solid #7dd3fc; }
-    @keyframes toastIn  { to { opacity:1; transform:translateY(0) scale(1); } }
-    @keyframes toastOut { to { opacity:0; transform:translateY(-8px) scale(0.96); } }
+    .toast.info    { border-left:4px solid #7c6ee6; }
+    @keyframes toastIn  { to{opacity:1;transform:translateY(0) scale(1);} }
+    @keyframes toastOut { to{opacity:0;transform:translateY(-8px) scale(0.96);} }
   </style>
 </head>
 <body>
@@ -155,7 +117,7 @@
 
 <div class="card">
   <div class="brand">
-    <div class="brand-dot">🌱</div>
+    <div class="brand-icon">🌱</div>
     <h1>MindMate AI</h1>
     <p>Your journey to wellness starts here</p>
   </div>
@@ -176,19 +138,13 @@
   </label>
 
   <button class="btn" onclick="register()">Create Account</button>
-
-  <div class="switch">
-    Already have an account? <a href="login.html">Sign in</a>
-  </div>
+  <div class="switch">Already have an account? <a href="login.html">Sign in</a></div>
 </div>
 
 <script src="auth.js"></script>
 <script src="toast.js"></script>
 <script>
-/* ============================================================
-   LIVING BACKGROUND — Sunrise over a misty meadow
-   Warm amber glow rising through soft fog layers + fireflies
-   ============================================================ */
+/* Same engine as login but register has a slightly warmer mint-rose tint */
 const canvas = document.getElementById('bg');
 const ctx    = canvas.getContext('2d');
 let W, H, t = 0;
@@ -197,161 +153,111 @@ function resize() { W = canvas.width = window.innerWidth; H = canvas.height = wi
 resize();
 window.addEventListener('resize', resize);
 
-/* ── fireflies / pollen ── */
-const FLIES = Array.from({length: 55}, () => ({
+const ORBS = Array.from({length: 14}, (_, i) => ({
   x:   Math.random(),
   y:   Math.random(),
-  vx:  (Math.random() - 0.5) * 0.00012,
-  vy:  -(0.00005 + Math.random() * 0.00012),
-  r:   1 + Math.random() * 2.5,
-  a:   0.4 + Math.random() * 0.5,
-  h:   40 + Math.random() * 50,   /* amber → gold → yellow-green */
-  flk: Math.random() * Math.PI * 2,
-  fspd:0.03 + Math.random() * 0.05,
+  r:   (180) + Math.random() * 220,
+  spd: 0.000035 + Math.random() * 0.00004,
+  off: Math.random() * Math.PI * 2,
+  hue: [173, 340, 258, 173, 340, 258, 173, 258, 340, 173, 258, 340, 258, 173][i],
+  sat: 58 + Math.random() * 20,
+  lit: 70 + Math.random() * 12,
+  a:   0.12 + Math.random() * 0.11,
 }));
 
-/* ── soft cloud layers ── */
-const CLOUDS = Array.from({length: 6}, () => ({
-  x:   Math.random(),
-  y:   0.25 + Math.random() * 0.3,
-  w:   0.18 + Math.random() * 0.28,
-  h:   0.06 + Math.random() * 0.10,
-  spd: 0.000025 + Math.random() * 0.00003,
-  a:   0.06 + Math.random() * 0.09,
+const DOTS = Array.from({length: 55}, () => ({
+  x: Math.random(), y: Math.random(),
+  vy: 0.000055 + Math.random() * 0.00008,
+  vx: (Math.random() - 0.5) * 0.000045,
+  r:  0.9 + Math.random() * 2,
+  a:  0.22 + Math.random() * 0.38,
+  hue:[173, 340, 258][Math.floor(Math.random() * 3)],
+  flk:Math.random() * Math.PI * 2,
+  fspd:0.018 + Math.random() * 0.025,
 }));
 
-let mouse = { x: W/2, y: H/2 };
-let glow  = { x: W/2, y: H/2 };
+const WAVES = [
+  { ampF:0.030, freqF:1.0, spdF:0.000050, yF:0.65, a:0.12, h:173 },
+  { ampF:0.024, freqF:1.4, spdF:0.000065, yF:0.71, a:0.09, h:340 },
+  { ampF:0.019, freqF:1.7, spdF:0.000080, yF:0.77, a:0.07, h:258 },
+];
+
+let mouse = {x:0,y:0}, glow = {x:0,y:0};
 document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
 document.addEventListener('click', e => {
   const d = document.createElement('div');
   d.className = 'ripple';
-  d.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;width:100px;height:100px;`;
+  d.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;width:130px;height:130px;`;
   document.body.appendChild(d);
   setTimeout(() => d.remove(), 900);
 });
 
-function drawGround() {
-  /* rolling hills silhouette */
-  ctx.beginPath();
-  ctx.moveTo(0, H);
-  const segs = 120;
-  for (let i = 0; i <= segs; i++) {
-    const nx = i / segs;
-    const ny = 0.72
-      + Math.sin(nx * Math.PI * 2.4 + t * 0.05) * 0.04
-      + Math.sin(nx * Math.PI * 4.8 + t * 0.03) * 0.02
-      + Math.sin(nx * Math.PI * 1.1 + 1.5)       * 0.05;
-    ctx.lineTo(nx * W, ny * H);
-  }
-  ctx.lineTo(W, H);
-  const grd = ctx.createLinearGradient(0, H * 0.7, 0, H);
-  grd.addColorStop(0, 'rgba(34, 55, 28, 0.85)');
-  grd.addColorStop(1, 'rgba(18, 30, 16, 0.95)');
-  ctx.fillStyle = grd;
-  ctx.fill();
-}
-
-function drawMist() {
-  /* three soft mist bands at horizon */
-  const bands = [
-    { y: 0.65, h: 0.12, a: 0.18, col: [255, 230, 180] },
-    { y: 0.60, h: 0.10, a: 0.10, col: [255, 220, 160] },
-    { y: 0.55, h: 0.08, a: 0.07, col: [240, 200, 150] },
-  ];
-  bands.forEach(b => {
-    const g = ctx.createLinearGradient(0, b.y * H, 0, (b.y + b.h) * H);
-    g.addColorStop(0, `rgba(${b.col},0)`);
-    g.addColorStop(0.4, `rgba(${b.col},${b.a})`);
-    g.addColorStop(1,   `rgba(${b.col},0)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, b.y * H, W, b.h * H);
-  });
-}
-
 function draw(ts) {
   t = ts * 0.001;
-  glow.x += (mouse.x - glow.x) * 0.05;
-  glow.y += (mouse.y - glow.y) * 0.05;
+  glow.x += (mouse.x - glow.x) * 0.055;
+  glow.y += (mouse.y - glow.y) * 0.055;
 
-  const sunCycle = (Math.sin(t * 0.04) + 1) / 2; /* 0→1 slow pulse */
+  const shift = (Math.sin(t * 0.06) + 1) / 2;
+  const bg = ctx.createLinearGradient(0, 0, W * 0.6, H);
+  bg.addColorStop(0,    `hsl(${175 + shift*12}, 44%, ${88 + shift*4}%)`);
+  bg.addColorStop(0.45, `hsl(${220 + shift*18}, 38%, ${90 + shift*3}%)`);
+  bg.addColorStop(1,    `hsl(${340 + shift*8},  40%, ${90 + shift*3}%)`);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
-  /* 1. Sky gradient — warm sunrise palette */
-  const sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0,    `hsl(${215 + sunCycle*15}, 45%, ${12 + sunCycle*5}%)`);
-  sky.addColorStop(0.35, `hsl(${30  + sunCycle*10}, 55%, ${22 + sunCycle*8}%)`);
-  sky.addColorStop(0.60, `hsl(${35  + sunCycle*5},  70%, ${38 + sunCycle*10}%)`);
-  sky.addColorStop(0.75, `hsl(${40  + sunCycle*5},  60%, ${28 + sunCycle*6}%)`);
-  sky.addColorStop(1,    `hsl(${200}, 30%, 8%)`);
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, H);
-
-  /* 2. Sun glow on horizon */
-  const sunX = W * (0.45 + Math.sin(t * 0.02) * 0.05);
-  const sunY = H * (0.58 + Math.sin(t * 0.015) * 0.02);
-  const sunRad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, W * 0.38);
-  sunRad.addColorStop(0,   `rgba(255, 220, 140, ${0.22 + sunCycle * 0.12})`);
-  sunRad.addColorStop(0.3, `rgba(255, 180,  80, ${0.14 + sunCycle * 0.08})`);
-  sunRad.addColorStop(0.7, `rgba(220, 130,  50, ${0.06})`);
-  sunRad.addColorStop(1,   'transparent');
-  ctx.beginPath();
-  ctx.arc(sunX, sunY, W * 0.38, 0, Math.PI * 2);
-  ctx.fillStyle = sunRad;
-  ctx.fill();
-
-  /* 3. Soft cloud shapes */
-  CLOUDS.forEach(c => {
-    c.x = (c.x + c.spd) % 1.3;
-    const cx = c.x * W, cy = c.y * H;
-    const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.w * W);
-    cg.addColorStop(0,   `rgba(255,235,200,${c.a})`);
-    cg.addColorStop(0.5, `rgba(255,220,170,${c.a*0.5})`);
-    cg.addColorStop(1,   'transparent');
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, c.w * W, c.h * H, 0, 0, Math.PI * 2);
-    ctx.fillStyle = cg;
-    ctx.fill();
+  ORBS.forEach(o => {
+    const px = (o.x + Math.sin(t * o.spd * 55 + o.off) * 0.13) * W;
+    const py = (o.y + Math.cos(t * o.spd * 42 + o.off) * 0.10) * H;
+    const pulse = 1 + Math.sin(t * 0.28 + o.off) * 0.08;
+    const rr = ctx.createRadialGradient(px, py, 0, px, py, o.r * pulse);
+    rr.addColorStop(0,   `hsla(${o.hue},${o.sat}%,${o.lit}%,${o.a})`);
+    rr.addColorStop(0.55,`hsla(${o.hue+15},${o.sat-8}%,${o.lit-5}%,${o.a*0.4})`);
+    rr.addColorStop(1,   'transparent');
+    ctx.beginPath(); ctx.arc(px, py, o.r * pulse, 0, Math.PI * 2);
+    ctx.fillStyle = rr; ctx.fill();
   });
 
-  /* 4. Ground + mist */
-  drawGround();
-  drawMist();
+  /* waves */
+  WAVES.forEach(w => {
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 4) {
+      const nx = x / W;
+      const y = H * w.yF
+        + Math.sin(nx * w.freqF * Math.PI * 2 + t * w.spdF * 60000) * H * w.ampF
+        + Math.sin(nx * w.freqF * 1.7 * Math.PI * 2 + t * w.spdF * 38000 + 1.2) * H * w.ampF * 0.45;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    const g = ctx.createLinearGradient(0, H * (w.yF - w.ampF * 2), 0, H);
+    g.addColorStop(0,   `hsla(${w.h},52%,72%,${w.a})`);
+    g.addColorStop(0.5, `hsla(${w.h},44%,66%,${w.a*0.5})`);
+    g.addColorStop(1,   'transparent');
+    ctx.fillStyle = g; ctx.fill();
+  });
 
-  /* 5. Cursor warmth bloom */
   const cgr = ctx.createRadialGradient(glow.x, glow.y, 0, glow.x, glow.y, 160);
-  cgr.addColorStop(0,   'rgba(255, 210, 120, 0.09)');
-  cgr.addColorStop(0.6, 'rgba(255, 180,  80, 0.04)');
+  cgr.addColorStop(0,   'rgba(125,213,200,0.09)');
+  cgr.addColorStop(0.55,'rgba(240,160,184,0.04)');
   cgr.addColorStop(1,   'transparent');
-  ctx.beginPath();
-  ctx.arc(glow.x, glow.y, 160, 0, Math.PI * 2);
-  ctx.fillStyle = cgr;
-  ctx.fill();
+  ctx.beginPath(); ctx.arc(glow.x, glow.y, 160, 0, Math.PI * 2);
+  ctx.fillStyle = cgr; ctx.fill();
 
-  /* 6. Fireflies */
-  FLIES.forEach(f => {
-    f.x += f.vx; f.y += f.vy; f.flk += f.fspd;
-    if (f.y < -0.02) { f.y = 0.85 + Math.random() * 0.1; f.x = Math.random(); }
-    if (f.x < 0 || f.x > 1) f.vx *= -1;
-    const flick = (Math.sin(f.flk) + 1) / 2;
-    if (flick < 0.3) return; /* off phase */
-    ctx.beginPath();
-    ctx.arc(f.x * W, f.y * H, f.r * flick, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${f.h}, 85%, 75%, ${f.a * flick})`;
-    ctx.shadowBlur = 6 * flick;
-    ctx.shadowColor = `hsla(${f.h}, 85%, 75%, 0.5)`;
-    ctx.fill();
-    ctx.shadowBlur = 0;
+  DOTS.forEach(p => {
+    p.x += p.vx; p.y -= p.vy; p.flk += p.fspd;
+    if (p.y < -0.02) { p.y = 1.02; p.x = Math.random(); }
+    if (p.x < 0 || p.x > 1) p.vx *= -1;
+    const f = 0.5 + Math.sin(p.flk) * 0.5;
+    ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue},60%,72%,${p.a * f})`; ctx.fill();
   });
 
-  /* 7. Top darkness vignette */
-  const vig = ctx.createLinearGradient(0, 0, 0, H * 0.28);
-  vig.addColorStop(0, 'rgba(8,12,28,0.5)');
-  vig.addColorStop(1, 'transparent');
-  ctx.fillStyle = vig;
-  ctx.fillRect(0, 0, W, H);
+  const vig = ctx.createRadialGradient(W/2, H/2, H*0.28, W/2, H/2, H*0.82);
+  vig.addColorStop(0, 'transparent');
+  vig.addColorStop(1, 'rgba(210,200,240,0.16)');
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
 
   requestAnimationFrame(draw);
 }
+mouse.x = W/2; mouse.y = H/2;
 requestAnimationFrame(draw);
 </script>
 
