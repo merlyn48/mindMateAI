@@ -134,3 +134,15 @@ body.dark-mode .suggestion-btn { background:var(--c-surface2); }
 /* push nav links and footer down naturally */
 .sidebar > .nav-main   { margin-top: auto; }
 .sidebar > .nav-secondary { margin-top: 0; }
+
+/* logo as dashboard link */
+.logo-link {
+  text-decoration: none;
+}
+.logo-link .logo {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.logo-link .logo:hover {
+  opacity: 0.75;
+}
