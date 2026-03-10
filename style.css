@@ -508,3 +508,11 @@ textarea.input-style { min-height:120px;resize:vertical; }
   .support-grid { grid-template-columns: 1fr; }
   .mood-section { width: 100%; }
 }
+
+/* ── Inner page layout (profile, settings) ── */
+.inner-page {
+  flex: 1;
+  overflow-y: auto;
+  padding: 56px 64px;
+  background: var(--c-bg);
+}
