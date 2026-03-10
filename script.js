@@ -325,15 +325,45 @@ function generateChatTitle(userMessage) {
 }
 
 /* ── Chat Engine ───────────────────────────────────────────── */
+/* Topic openers triggered by dashboard cards */
+const TOPIC_OPENERS = {
+  stress:     "I've been feeling really stressed and overwhelmed lately. Can you help me with some grounding techniques?",
+  motivation: "I've been struggling with motivation and can't seem to get things done. I really need some help.",
+  sleep:      "I've been having a lot of trouble sleeping lately. My mind just won't switch off at night.",
+};
+
 window.onload = () => {
   renderChatList();
-  if (chats.length > 0) loadChat(chats[0].id);
+
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") {
     document.body.classList.add("dark-mode");
     if (themeToggle) themeToggle.textContent = "☀️ Light Mode";
   } else {
     if (themeToggle) themeToggle.textContent = "🌙 Dark Mode";
+  }
+
+  // Check if arriving from a dashboard card
+  const params = new URLSearchParams(window.location.search);
+  const topic  = params.get("topic");
+
+  if (topic === "new") {
+    // Plain "Talk to MindMate" card — open a fresh blank chat
+    createNewChat();
+    history.replaceState(null, "", "index.html");
+  } else if (topic && TOPIC_OPENERS[topic]) {
+    // Themed card — start a new chat and auto-send the opener
+    createNewChat();
+    setTimeout(() => {
+      if (messageInput) {
+        messageInput.value = TOPIC_OPENERS[topic];
+        sendMessage();
+        history.replaceState(null, "", "index.html");
+      }
+    }, 150);
+  } else {
+    // Normal load — restore last chat
+    if (chats.length > 0) loadChat(chats[0].id);
   }
 };
 
