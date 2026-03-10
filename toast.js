@@ -1,9 +1,8 @@
 /* ================================================================
-   MindMate AI — Toast Notifications  v3.0
-   Improvements:
-   - ARIA role="alert" for screen reader support
-   - Icon added per toast type for visual clarity
-   - Dismissable on click
+   MindMate AI — Toast Notifications  v3.1
+   - No icons (cleaner look)
+   - ARIA role="alert" for screen readers
+   - Click to dismiss
    ================================================================ */
 
 function showToast(message, type = "info") {
@@ -16,21 +15,13 @@ function showToast(message, type = "info") {
     document.body.appendChild(container);
   }
 
-  const icons = { success: "✓", error: "✕", info: "ℹ" };
-
   const toast = document.createElement("div");
   toast.className = "toast " + type;
   toast.setAttribute("role", "alert");
   toast.style.cursor = "pointer";
 
-  const icon = document.createElement("span");
-  icon.textContent = icons[type] || icons.info;
-  icon.style.cssText = "font-weight:700;flex-shrink:0;";
-
   const msg = document.createElement("span");
-  msg.textContent = message; // textContent — safe from XSS
-
-  toast.appendChild(icon);
+  msg.textContent = message;
   toast.appendChild(msg);
   container.appendChild(toast);
 
