@@ -1,99 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Settings - MindMate AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Settings — MindMate AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <div class="app-container">
+  <script>
+    if (!localStorage.getItem("loggedInUser")) {
+      window.location.href = "login.html";
+    }
+  </script>
 
-        <aside class="sidebar">
-            <h2 class="logo">MindMate AI</h2>
-            <div class="sidebar-profile">
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()" aria-hidden="true"></div>
 
-                <img id="sidebarAvatar" class="sidebar-avatar">
+  <header class="mobile-header" aria-label="Mobile navigation">
+    <button class="hamburger" onclick="openSidebar()" aria-label="Open menu" aria-expanded="false" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-logo">MindMate AI</span>
+  </header>
 
-                <div class="sidebar-user">
+  <div class="app-container">
 
-                    <span id="sidebarName"></span>
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main sidebar">
+      <h2 class="logo">MindMate AI</h2>
 
-                </div>
+      <div class="sidebar-profile">
+        <img id="sidebarAvatar" class="sidebar-avatar" alt="Your avatar">
+        <div class="sidebar-user">
+          <span id="sidebarName"></span>
+        </div>
+      </div>
 
-            </div>
+      <nav class="nav-main" aria-label="Main navigation">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="index.html">Chat</a>
+      </nav>
 
-            <!-- MAIN NAVIGATION -->
+      <nav class="nav-secondary" aria-label="Account navigation">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
 
-            <nav class="nav-main">
+      <nav class="nav-info" aria-label="Info pages">
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </nav>
 
-                <a href="dashboard.html">Dashboard</a>
-                <a href="index.html">Chat</a>
+      <div class="sidebar-footer">
+        <button id="audioToggle" class="sidebar-audio-btn" aria-label="Toggle calm audio">🎵 Calm Audio</button>
+        <button onclick="logout()" class="logout-btn" aria-label="Log out">Logout</button>
+      </div>
+    </aside>
 
-            </nav>
+    <main class="chat-section" role="main">
+      <div class="page-wrapper">
+        <div class="page-header">
+          <h1>⚙ Settings</h1>
+          <p>Manage your preferences</p>
+        </div>
 
-            <!-- ACCOUNT -->
+        <div class="card-box">
+          <h3>Appearance</h3>
+          <div class="setting-row">
+            <label for="darkModeToggle">Dark Mode</label>
+            <label class="toggle-switch" aria-label="Toggle dark mode">
+              <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <label for="sparklesToggle">Cursor Sparkles</label>
+            <label class="toggle-switch" aria-label="Toggle cursor sparkles">
+              <input type="checkbox" id="sparklesToggle" onchange="toggleSparkles(this.checked)" checked>
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+        </div>
 
-            <nav class="nav-secondary">
+        <div class="card-box">
+          <h3>Data</h3>
+          <div class="setting-row">
+            <span>Chat History</span>
+            <span style="color:var(--c-muted);font-size:13px;">Stored locally on this device</span>
+          </div>
+          <div class="setting-row">
+            <span>Clear All Chats</span>
+            <button class="danger-btn" onclick="clearChats()" aria-label="Clear all chat history">Clear History</button>
+          </div>
+          <div class="setting-row">
+            <span>Clear Mood Data</span>
+            <button class="danger-btn" onclick="clearMoods()" aria-label="Clear mood tracking data">Clear Moods</button>
+          </div>
+        </div>
 
-                <a href="profile.html">Profile</a>
-                <a href="settings.html">Settings</a>
+        <div class="card-box">
+          <h3>Account</h3>
+          <div class="setting-row">
+            <span>Logged in as</span>
+            <strong id="settingsUserName"></strong>
+          </div>
+          <div class="setting-row">
+            <span>Sign out</span>
+            <button class="danger-btn" onclick="logout()" aria-label="Log out">Log Out</button>
+          </div>
+        </div>
 
-            </nav>
+      </div>
+    </main>
+  </div>
 
-            <!-- WEBSITE PAGES -->
+  <style>
+    .toggle-switch { position:relative;display:inline-block;width:44px;height:24px;cursor:pointer; }
+    .toggle-switch input { opacity:0;width:0;height:0; }
+    .toggle-track {
+      position:absolute;inset:0;background:var(--c-border-hover);border-radius:12px;
+      transition:background 0.25s;border:1px solid var(--c-border);
+    }
+    .toggle-switch input:checked + .toggle-track { background:var(--c-accent); }
+    .toggle-thumb {
+      position:absolute;top:3px;left:3px;width:16px;height:16px;
+      background:white;border-radius:50%;transition:transform 0.25s var(--ease-spring);
+      box-shadow:0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked + .toggle-track .toggle-thumb { transform:translateX(20px); }
+    .danger-btn {
+      padding:7px 14px;border-radius:var(--r-sm);border:1px solid rgba(239,68,68,0.25);
+      background:rgba(239,68,68,0.07);color:#ef4444;font-size:13px;font-family:inherit;
+      cursor:pointer;transition:all 0.22s var(--ease-spring);font-weight:500;
+    }
+    .danger-btn:hover { background:#ef4444;color:white;box-shadow:0 4px 14px rgba(239,68,68,0.3); }
+  </style>
 
-            <nav class="nav-info">
+  <script src="auth.js"></script>
+  <script src="sidebar.js"></script>
+  <script src="toast.js"></script>
+  <script src="audio.js"></script>
+  <script src="effects.js"></script>
 
-                <a href="about.html">About</a>
-                <a href="faq.html">FAQ</a>
-                <a href="contact.html">Contact</a>
-                <a href="privacy.html">Privacy Policy</a>
+  <script>
+    /* Set user name safely */
+    const nameEl = document.getElementById("settingsUserName");
+    if (nameEl) nameEl.textContent = localStorage.getItem("loggedInUser") || "User";
 
-            </nav>
+    /* Restore dark mode toggle state */
+    const darkToggle = document.getElementById("darkModeToggle");
+    if (darkToggle) darkToggle.checked = localStorage.getItem("theme") === "dark";
 
-            <div class="sidebar-footer">
-                <button id="audioToggle" class="sidebar-audio-btn">🎵 Calm Audio</button>
-                <button onclick="logout()" class="logout-btn">Logout</button>
-            </div>
+    /* Restore sparkles state */
+    const sparkToggle = document.getElementById("sparklesToggle");
+    if (sparkToggle) sparkToggle.checked = localStorage.getItem("mm_sparkles") !== "off";
 
-        </aside>
+    function toggleDarkMode(on) {
+      document.body.classList.toggle("dark-mode", on);
+      localStorage.setItem("theme", on ? "dark" : "light");
+      showToast("Dark mode " + (on ? "enabled" : "disabled"), "info");
+    }
 
-        <main class="chat-section" style="padding:50px;">
-            <h1>⚙ Settings</h1>
-            <br>
+    function toggleSparkles(on) {
+      localStorage.setItem("mm_sparkles", on ? "on" : "off");
+      showToast("Cursor sparkles " + (on ? "enabled" : "disabled"), "info");
+    }
 
-            <div class="card-box">
+    function clearChats() {
+      const user = localStorage.getItem("loggedInUser");
+      const key  = "mindmate_chats_" + user;
+      localStorage.removeItem(key);
+      sessionStorage.clear();
+      showToast("Chat history cleared", "success");
+    }
 
-                <h3>Preferences</h3>
+    function clearMoods() {
+      localStorage.removeItem("mindmate_week_moods");
+      localStorage.removeItem("mindmate_mood");
+      showToast("Mood data cleared", "success");
+    }
 
-                <div class="setting-row">
-                    <span>Dark Mode</span>
-                    <span>Auto</span>
-                </div>
+    /* Apply dark mode on load */
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+    }
 
-                <div class="setting-row">
-                    <span>Email Notifications</span>
-                    <span>Enabled</span>
-                </div>
-
-                <div class="setting-row">
-                    <span>Chat History</span>
-                    <span>Stored Locally</span>
-                </div>
-
-            </div>
-        </main>
-
-    </div>
-    <script src="sidebar.js"></script>
-    <script src="toast.js"></script>
-<script src="audio.js"></script>
-<script src="effects.js"></script>
+    /* Mobile sidebar toggle */
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.add("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "true");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.remove("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "false");
+    }
+  </script>
 </body>
-
 </html>
