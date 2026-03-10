@@ -339,14 +339,10 @@ window.onload = () => {
 
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    if (document.body.classList.contains("dark-mode")) {
-      themeToggle.textContent = "☀️ Light Mode";
-      localStorage.setItem("theme", "dark");
-    } else {
-      themeToggle.textContent = "🌙 Dark Mode";
-      localStorage.setItem("theme", "light");
-    }
+    const isDark = document.body.classList.toggle("dark-mode");
+    document.documentElement.classList.toggle("dark-mode", isDark);
+    themeToggle.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   });
 }
 
