@@ -1,348 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard - MindMate AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
+  <meta charset="UTF-8">
+  <title>Dashboard — MindMate AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="particles"></div>
-    <style>
-        .particles {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background-image:
-                radial-gradient(circle, #8b7cf6 1px, transparent 1px);
-            background-size: 40px 40px;
-            opacity: 0.08;
-            animation: moveParticles 60s linear infinite;
-        }
 
-        @keyframes moveParticles {
-            from {
-                transform: translateY(0)
-            }
-
-            to {
-                transform: translateY(-1000px)
-            }
-        }
-    </style>
-    <!-- LOGIN PROTECTION -->
-    <script>
-        if (!localStorage.getItem("loggedInUser")) {
-            window.location.href = "login.html";
-        }
-    </script>
-
-    <div class="app-container">
-
-        <!-- SIDEBAR -->
-
-        <aside class="sidebar">
-            <h2 class="logo">MindMate AI</h2>
-            <div class="sidebar-profile">
-
-                <img id="sidebarAvatar" class="sidebar-avatar">
-
-                <div class="sidebar-user">
-
-                    <span id="sidebarName"></span>
-
-                </div>
-
-            </div>
-
-            <!-- MAIN NAVIGATION -->
-
-            <nav class="nav-main">
-
-                <a href="dashboard.html">Dashboard</a>
-                <a href="index.html">Chat</a>
-
-            </nav>
-
-            <!-- ACCOUNT -->
-
-            <nav class="nav-secondary">
-
-                <a href="profile.html">Profile</a>
-                <a href="settings.html">Settings</a>
-
-            </nav>
-
-            <!-- WEBSITE PAGES -->
-
-            <nav class="nav-info">
-
-                <a href="about.html">About</a>
-                <a href="faq.html">FAQ</a>
-                <a href="contact.html">Contact</a>
-                <a href="privacy.html">Privacy Policy</a>
-
-            </nav>
-
-            <div class="sidebar-footer">
-                <button id="audioToggle" class="sidebar-audio-btn">🎵 Calm Audio</button>
-                <button onclick="logout()" class="logout-btn">Logout</button>
-            </div>
-
-        </aside>
-
-
-        <!-- MAIN DASHBOARD CONTENT -->
-
-        <main class="main-area">
-
-            <header class="dashboard-header">
-
-                <h1>Welcome back 🌿</h1>
-
-                <p>
-                    Hello <strong id="welcomeName"></strong>,
-                    take a moment to check in with yourself.
-                </p>
-
-            </header>
-
-
-            <!-- MOOD CHECK SECTION -->
-
-            <section class="mood-section">
-
-                <h3>How are you feeling today?</h3>
-
-                <div class="mood-buttons">
-
-                    <button onclick="setMood('happy')">🙂</button>
-                    <button onclick="setMood('okay')">😐</button>
-                    <button onclick="setMood('stressed')">😟</button>
-                    <button onclick="setMood('sad')">😔</button>
-
-                </div>
-                <br>
-                <p id="moodResult"></p>
-
-            </section>
-
-
-            <!-- SUPPORT OPTIONS -->
-
-            <section class="support-section">
-
-                <h3>How can MindMate support you today?</h3>
-
-                <div class="support-grid">
-
-                    <div class="support-card" onclick="window.location.href='index.html'">
-
-                        <h4>💬 Talk to MindMate</h4>
-                        <p>Start a supportive conversation and share what's on your mind.</p>
-
-                    </div>
-
-                    <div class="support-card">
-
-                        <h4>🧠 Manage Stress</h4>
-                        <p>Learn grounding techniques to calm your mind.</p>
-
-                    </div>
-
-                    <div class="support-card">
-
-                        <h4>📚 Study Motivation</h4>
-                        <p>Stay focused and productive when studying.</p>
-
-                    </div>
-
-                    <div class="support-card">
-
-                        <h4>🌙 Sleep Support</h4>
-                        <p>Relax your thoughts and improve sleep habits.</p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- WELLBEING PROGRESS -->
-
-            <section class="progress-section">
-
-                <h3>Your Well-being Progress This Week</h3>
-
-                <div class="week-tracker">
-
-                    <div class="day" id="day1"></div>
-                    <div class="day" id="day2"></div>
-                    <div class="day" id="day3"></div>
-                    <div class="day" id="day4"></div>
-                    <div class="day" id="day5"></div>
-                    <div class="day" id="day6"></div>
-                    <div class="day" id="day7"></div>
-
-                </div>
-
-                <div class="week-labels">
-                    <span>M</span>
-                    <span>T</span>
-                    <span>W</span>
-                    <span>T</span>
-                    <span>F</span>
-                    <span>S</span>
-                    <span>S</span>
-                </div>
-
-            </section>
-
-        </main>
-
-    </div>
-
-
-    <script src="auth.js"></script>
-
-    <script>
-
-        /* USER NAME */
-
-        document.getElementById("welcomeName").innerText =
-            localStorage.getItem("loggedInUser");
-
-
-        /* ================= MOOD SYSTEM ================= */
-
-        function setMood(mood) {
-            document.querySelectorAll(".mood-buttons button")
-                .forEach(btn => btn.classList.remove("mood-selected"));
-
-            event.target.classList.add("mood-selected");
-
-            localStorage.setItem("mindmate_mood", mood);
-
-            /* save mood by day */
-
-            const today = new Date().getDay(); // 0-6
-
-            let moodWeek =
-                JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
-
-            moodWeek[today] = mood;
-
-            localStorage.setItem(
-                "mindmate_week_moods",
-                JSON.stringify(moodWeek)
-            );
-
-            /* show message */
-
-            const responses = {
-                happy: "I'm glad you're feeling good today 😊",
-                okay: "Thanks for checking in. I'm here if you want to talk.",
-                stressed: "I'm sorry you're feeling stressed. Maybe chatting could help.",
-                sad: "That sounds tough. Remember you're not alone."
-            };
-
-            document.getElementById("moodResult").textContent = responses[mood];
-
-            /* update tracker */
-
-            updateWeekTracker();
-
-        }
-
-
-        /* ================= WEEK TRACKER ================= */
-
-        function updateWeekTracker() {
-
-            let moods =
-                JSON.parse(localStorage.getItem("mindmate_week_moods")) || {};
-
-            /*
-              Boxes 1-7 = Mon Tue Wed Thu Fri Sat Sun
-              getDay() returns: 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
-              So box index i (0-based) maps to getDay() key: (i+1) % 7
-              i=0 Mon → key 1, i=1 Tue → key 2 ... i=5 Sat → key 6, i=6 Sun → key 0
-            */
-            for (let i = 0; i < 7; i++) {
-
-                let box = document.getElementById("day" + (i + 1));
-
-                if (!box) continue;
-
-                box.className = "day";
-
-                let key = (i + 1) % 7; // Mon=1 ... Sat=6, Sun=0
-
-                let mood = moods[key];
-
-                if (mood) {
-                    box.classList.add("mood-" + mood);
-                }
-
-            }
-
-        }
-
-
-        /* LOAD WHEN PAGE OPENS */
-
-        window.onload = () => {
-
-            const mood = localStorage.getItem("mindmate_mood");
-
-            if (mood) {
-                document.getElementById("moodResult").textContent =
-                    "Today's mood: " + mood;
-            }
-
-            updateWeekTracker();
-
-        };
-
-    </script>
-    <script>
-
-        const sidebarAvatar = document.getElementById("sidebarAvatar");
-        const sidebarName = document.getElementById("sidebarName");
-
-        const user = JSON.parse(localStorage.getItem("mindmate_user"));
-        const avatar = localStorage.getItem("mindmate_avatar");
-
-        if (sidebarName) {
-            sidebarName.innerText = user?.name || "User";
-        }
-
-        if (sidebarAvatar) {
-
-            if (avatar) {
-                sidebarAvatar.src = avatar;
-            } else {
-                sidebarAvatar.src =
-                    "https://ui-avatars.com/api/?name=" +
-                    (user?.name || "User") +
-                    "&background=8b7cf6&color=fff";
-            }
-
-        }
-
-    </script>
-
-    <script src="sidebar.js"></script>
-    <script src="toast.js"></script>
-    <script src="audio.js"></script>
-    <script src="effects.js"></script>
+  <!-- Login protection -->
+  <script>
+    if (!localStorage.getItem("loggedInUser")) {
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()" aria-hidden="true"></div>
+
+  <!-- Mobile header -->
+  <header class="mobile-header" aria-label="Mobile navigation">
+    <button class="hamburger" onclick="openSidebar()" aria-label="Open menu" aria-expanded="false" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-logo">MindMate AI</span>
+  </header>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main sidebar">
+      <h2 class="logo">MindMate AI</h2>
+
+      <div class="sidebar-profile">
+        <img id="sidebarAvatar" class="sidebar-avatar" alt="Your avatar">
+        <div class="sidebar-user">
+          <span id="sidebarName"></span>
+        </div>
+      </div>
+
+      <nav class="nav-main" aria-label="Main navigation">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="index.html">Chat</a>
+      </nav>
+
+      <nav class="nav-secondary" aria-label="Account navigation">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+
+      <nav class="nav-info" aria-label="Info pages">
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="audioToggle" class="sidebar-audio-btn" aria-label="Toggle calm audio">🎵 Calm Audio</button>
+        <button onclick="logout()" class="logout-btn" aria-label="Log out">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-area" role="main">
+
+      <header class="dashboard-header">
+        <h1>Welcome back 🌿</h1>
+        <p>Hello <strong id="welcomeName"></strong>, take a moment to check in with yourself.</p>
+      </header>
+
+      <!-- MOOD CHECK -->
+      <section class="mood-section" aria-labelledby="moodHeading">
+        <h3 id="moodHeading">How are you feeling today?</h3>
+        <div class="mood-buttons" role="group" aria-label="Mood selection">
+          <button onclick="setMood('happy', this)"  aria-label="Happy">🙂</button>
+          <button onclick="setMood('okay', this)"   aria-label="Okay">😐</button>
+          <button onclick="setMood('stressed', this)" aria-label="Stressed">😟</button>
+          <button onclick="setMood('sad', this)"    aria-label="Sad">😔</button>
+        </div>
+        <p id="moodResult" aria-live="polite"></p>
+      </section>
+
+      <!-- SUPPORT OPTIONS -->
+      <section class="support-section" aria-labelledby="supportHeading">
+        <h3 id="supportHeading">How can MindMate support you today?</h3>
+        <div class="support-grid">
+          <div class="support-card" onclick="window.location.href='index.html'" role="button" tabindex="0"
+               onkeypress="if(event.key==='Enter')window.location.href='index.html'" aria-label="Talk to MindMate">
+            <h4>💬 Talk to MindMate</h4>
+            <p>Start a supportive conversation and share what's on your mind.</p>
+          </div>
+          <div class="support-card" onclick="window.location.href='index.html?topic=stress'" role="button" tabindex="0"
+               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=stress'" aria-label="Manage Stress">
+            <h4>🧠 Manage Stress</h4>
+            <p>Learn grounding techniques to calm your mind.</p>
+          </div>
+          <div class="support-card" onclick="window.location.href='index.html?topic=motivation'" role="button" tabindex="0"
+               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=motivation'" aria-label="Study Motivation">
+            <h4>📚 Study Motivation</h4>
+            <p>Stay focused and productive when studying.</p>
+          </div>
+          <div class="support-card" onclick="window.location.href='index.html?topic=sleep'" role="button" tabindex="0"
+               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=sleep'" aria-label="Sleep Support">
+            <h4>🌙 Sleep Support</h4>
+            <p>Relax your thoughts and improve sleep habits.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- WELLBEING PROGRESS -->
+      <section class="progress-section" aria-labelledby="progressHeading">
+        <h3 id="progressHeading">Your Well-being This Week</h3>
+        <div class="week-tracker" role="img" aria-label="Weekly mood tracker">
+          <div class="day" id="day1"></div>
+          <div class="day" id="day2"></div>
+          <div class="day" id="day3"></div>
+          <div class="day" id="day4"></div>
+          <div class="day" id="day5"></div>
+          <div class="day" id="day6"></div>
+          <div class="day" id="day7"></div>
+        </div>
+        <div class="week-labels" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span>
+          <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="sidebar.js"></script>
+  <script src="toast.js"></script>
+  <script src="audio.js"></script>
+  <script src="effects.js"></script>
+
+  <script>
+    /* Safe JSON helper */
+    function safeParseJSON(val, fallback) {
+      try { return val ? JSON.parse(val) : fallback; }
+      catch { return fallback; }
+    }
+
+    /* Set welcome name safely */
+    const nameEl = document.getElementById("welcomeName");
+    if (nameEl) nameEl.textContent = localStorage.getItem("loggedInUser") || "there";
+
+    /* ── Mood System ── */
+    function setMood(mood, btn) {
+      document.querySelectorAll(".mood-buttons button")
+        .forEach(b => b.classList.remove("mood-selected"));
+      btn.classList.add("mood-selected");
+
+      localStorage.setItem("mindmate_mood", mood);
+
+      const today = new Date().getDay();
+      const moodWeek = safeParseJSON(localStorage.getItem("mindmate_week_moods"), {});
+      moodWeek[today] = mood;
+      localStorage.setItem("mindmate_week_moods", JSON.stringify(moodWeek));
+
+      const responses = {
+        happy:   "I'm glad you're feeling good today 😊",
+        okay:    "Thanks for checking in. I'm here if you want to talk.",
+        stressed:"I'm sorry you're feeling stressed. Maybe chatting could help.",
+        sad:     "That sounds tough. Remember you're not alone 💜"
+      };
+
+      const resultEl = document.getElementById("moodResult");
+      if (resultEl) resultEl.textContent = responses[mood] || "";
+      updateWeekTracker();
+    }
+
+    /* ── Week Tracker ── */
+    function updateWeekTracker() {
+      const moods = safeParseJSON(localStorage.getItem("mindmate_week_moods"), {});
+      for (let i = 0; i < 7; i++) {
+        const box = document.getElementById("day" + (i + 1));
+        if (!box) continue;
+        box.className = "day";
+        const key = (i + 1) % 7; // Mon=1..Sat=6, Sun=0
+        const mood = moods[key];
+        if (mood) box.classList.add("mood-" + mood);
+      }
+    }
+
+    /* ── Restore today's mood on load ── */
+    window.addEventListener("DOMContentLoaded", () => {
+      const mood = localStorage.getItem("mindmate_mood");
+      const resultEl = document.getElementById("moodResult");
+      if (mood && resultEl) resultEl.textContent = "Today's mood: " + mood;
+      updateWeekTracker();
+
+      // Restore selected mood button
+      if (mood) {
+        document.querySelectorAll(".mood-buttons button").forEach(btn => {
+          if (btn.getAttribute("aria-label")?.toLowerCase() === mood) {
+            btn.classList.add("mood-selected");
+          }
+        });
+      }
+    });
+
+    /* Mobile sidebar toggle */
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.add("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "true");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.remove("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "false");
+    }
+  </script>
 </body>
-
 </html>
