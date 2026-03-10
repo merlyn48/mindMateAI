@@ -1,91 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>MindMate AI</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="chat.css">
+  <meta charset="UTF-8">
+  <title>Chat — MindMate AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="chat.css">
 </head>
 <body>
 
-    <script>
-        if (!localStorage.getItem("loggedInUser")) {
-            window.location.href = "login.html";
-        }
-    </script>
+  <!-- Login protection -->
+  <script>
+    if (!localStorage.getItem("loggedInUser")) {
+      window.location.href = "login.html";
+    }
+  </script>
 
-    <div class="app-container">
+  <!-- Mobile sidebar overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()" aria-hidden="true"></div>
 
-        <aside class="sidebar">
+  <!-- Mobile header bar -->
+  <header class="mobile-header" aria-label="Mobile navigation">
+    <button class="hamburger" onclick="openSidebar()" aria-label="Open menu" aria-expanded="false" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-logo">MindMate AI</span>
+  </header>
 
-            <!-- Logo links back to dashboard -->
-            <a href="dashboard.html" class="logo-link" title="Back to Dashboard">
-                <h2 class="logo">MindMate AI</h2>
-            </a>
+  <div class="app-container">
 
-            <!-- Profile -->
-            <div class="sidebar-profile">
-                <img id="sidebarAvatar" class="sidebar-avatar">
-                <div class="sidebar-user">
-                    <span id="sidebarName"></span>
-                </div>
-            </div>
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main sidebar">
 
-            <!-- New chat + history -->
-            <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
+      <a href="dashboard.html" class="logo-link" title="Back to Dashboard">
+        <h2 class="logo">MindMate AI</h2>
+      </a>
 
-            <div class="chat-history">
-                <h4>Recent Chats</h4>
-                <ul id="historyList"></ul>
-            </div>
+      <div class="sidebar-profile">
+        <img id="sidebarAvatar" class="sidebar-avatar" alt="Your avatar">
+        <div class="sidebar-user">
+          <span id="sidebarName"></span>
+        </div>
+      </div>
 
-            <!-- Footer -->
-            <div class="sidebar-footer">
-                <button id="audioToggle" class="sidebar-audio-btn">🎵 Calm Audio</button>
-                <button id="themeToggle" class="theme-toggle">🌙 Dark Mode</button>
-                <button onclick="logout()" class="logout-btn">Logout</button>
-            </div>
+      <button id="newChatBtn" class="new-chat-btn" aria-label="Start a new chat">+ New Chat</button>
 
-        </aside>
+      <div class="chat-history">
+        <h4>Recent Chats</h4>
+        <ul id="historyList" role="list" aria-label="Chat history"></ul>
+      </div>
 
-        <!-- Chat area -->
-        <main class="chat-section">
+      <nav class="nav-main" aria-label="Main navigation">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="index.html">Chat</a>
+      </nav>
 
-            <div id="welcomeScreen" class="welcome-screen">
-                <h1>How can I support you today?</h1>
-                <p>AI-powered student counselling assistant</p>
-                <br>
-                <div class="suggestions">
-                    <button class="suggestion-btn">Exam Stress</button>
-                    <button class="suggestion-btn">Career Guidance</button>
-                    <button class="suggestion-btn">Motivation</button>
-                    <button class="suggestion-btn">Anxiety Help</button>
-                </div>
-            </div>
+      <nav class="nav-secondary" aria-label="Account navigation">
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
 
-            <div id="chatContainer" class="chat-container"></div>
+      <div class="sidebar-footer">
+        <button id="audioToggle" class="sidebar-audio-btn" aria-label="Toggle calm audio">🎵 Calm Audio</button>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙 Dark Mode</button>
+        <button onclick="logout()" class="logout-btn" aria-label="Log out">Logout</button>
+      </div>
 
-            <div id="typingIndicator" class="typing-indicator hidden">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
+    </aside>
 
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
-                <button id="sendBtn" class="send-btn">➤</button>
-            </div>
+    <!-- Chat area -->
+    <main class="chat-section" role="main" aria-label="Chat area">
 
-        </main>
-    </div>
+      <div id="welcomeScreen" class="welcome-screen">
+        <h1>How can I support you today?</h1>
+        <p>AI-powered student wellbeing assistant</p>
+        <br>
+        <div class="suggestions" role="group" aria-label="Suggested topics">
+          <button class="suggestion-btn">Exam Stress</button>
+          <button class="suggestion-btn">Career Guidance</button>
+          <button class="suggestion-btn">Motivation</button>
+          <button class="suggestion-btn">Anxiety Help</button>
+        </div>
+      </div>
 
-    <script src="auth.js"></script>
-    <script src="script.js"></script>
-    <script src="sidebar.js"></script>
-    <script src="toast.js"></script>
-    <script src="audio.js"></script>
-    <script src="effects.js"></script>
+      <div id="chatContainer" class="chat-container" role="log" aria-live="polite" aria-label="Chat messages"></div>
+
+      <div id="typingIndicator" class="typing-indicator hidden" aria-label="MindMate is typing" role="status">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <div class="input-area" role="form" aria-label="Message input">
+        <label for="messageInput" class="sr-only">Type your message</label>
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type your message here…"
+          autocomplete="off"
+          aria-label="Message input"
+          maxlength="1000"
+        >
+        <button id="sendBtn" class="send-btn" aria-label="Send message">➤</button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Screen-reader only utility class -->
+  <style>
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+  </style>
+
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+  <script src="sidebar.js"></script>
+  <script src="toast.js"></script>
+  <script src="audio.js"></script>
+  <script src="effects.js"></script>
+
+  <script>
+    /* Mobile sidebar toggle */
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.add("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "true");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("sidebar-open");
+      document.getElementById("sidebarOverlay").classList.remove("visible");
+      document.getElementById("hamburgerBtn").setAttribute("aria-expanded", "false");
+    }
+  </script>
 </body>
 </html>
