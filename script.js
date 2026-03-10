@@ -279,9 +279,8 @@ function generateReply(text) {
   }
 }
 
-/* ── AI reply wrapper (uses local engine, no API needed) ─── */
+/* ── AI reply wrapper — restores state, adds realistic typing delay ── */
 async function getAIReply(userMessage, chatId) {
-  // Save conversation turn to sessionStorage for state continuity across reloads
   const savedState = safeParseJSON(sessionStorage.getItem("mm_state_" + chatId), null);
   if (savedState) {
     state.topic = savedState.topic;
@@ -291,7 +290,38 @@ async function getAIReply(userMessage, chatId) {
   const reply = generateReply(userMessage);
 
   sessionStorage.setItem("mm_state_" + chatId, JSON.stringify({ topic: state.topic, turn: state.turn }));
+
+  // Always show typing indicator for exactly 3 seconds before responding
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
   return reply;
+}
+
+/* ── Smart 2-3 word chat title from topic + first message ── */
+function generateChatTitle(userMessage) {
+  const lower = userMessage.toLowerCase();
+
+  // Topic-aware short titles
+  if (lower.match(/exam|test|study|revision|finals|midterm/))   return "Exam Stress";
+  if (lower.match(/anxious|anxiety|panic|overthink|worry/))     return "Feeling Anxious";
+  if (lower.match(/sad|depress|hopeless|lonely|crying|empty/))  return "Low Mood";
+  if (lower.match(/sleep|insomnia|tired|nightmare|exhausted/))  return "Sleep Issues";
+  if (lower.match(/motivat|procrastin|lazy|stuck|focus/))       return "Motivation Help";
+  if (lower.match(/career|job|degree|future|internship/))       return "Career Guidance";
+  if (lower.match(/stress|overwhelm|pressure|burnout/))         return "Feeling Stressed";
+
+  // Fallback: take first 2-3 meaningful words from the message
+  const stopwords = new Set(["i","am","im","i'm","a","an","the","is","are","was","were",
+    "be","been","being","have","has","had","do","does","did","will","would","could","should",
+    "can","may","might","shall","to","of","in","on","at","by","for","with","about","so","and",
+    "but","or","not","just","really","very","so","too","also","how","what","why","when","help"]);
+
+  const words = userMessage.replace(/[^\w\s]/g, "").split(/\s+/)
+    .filter(w => w.length > 2 && !stopwords.has(w.toLowerCase()));
+
+  if (words.length >= 2) return words.slice(0, 3).join(" ");
+  if (words.length === 1) return words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  return "New Chat";
 }
 
 /* ── Chat Engine ───────────────────────────────────────────── */
@@ -530,10 +560,10 @@ async function sendMessage() {
   if (sendBtn) sendBtn.removeAttribute("disabled");
   messageInput.focus();
 
-  // Auto-name chat from first user message
+  // Auto-name chat after first exchange using smart title
   const chat = chats.find(c => c.id === currentChatId);
   if (chat && chat.name === "New Chat" && chat.messages.filter(m => m.sender === "user").length === 1) {
-    chat.name = text.length > 36 ? text.substring(0, 36) + "…" : text;
+    chat.name = generateChatTitle(text);
     saveChats();
     renderChatList();
   }
