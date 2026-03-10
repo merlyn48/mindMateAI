@@ -216,6 +216,7 @@
 
     function toggleDarkMode(on) {
       document.body.classList.toggle("dark-mode", on);
+      document.documentElement.classList.toggle("dark-mode", on);
       localStorage.setItem("theme", on ? "dark" : "light");
       showToast("Dark mode " + (on ? "enabled" : "disabled"), "info");
     }
