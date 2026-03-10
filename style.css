@@ -423,3 +423,88 @@ textarea.input-style { min-height:120px;resize:vertical; }
   .support-grid{grid-template-columns:1fr}
   .mood-section{width:100%}
 }
+
+/* ================================================================
+   MindMate AI — v3.0 Additions
+   Mobile sidebar, modal animations, profile page padding fix
+   ================================================================ */
+
+/* Modal slide-up animation */
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(18px) scale(0.97); }
+  to   { opacity:1; transform:none; }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+
+/* Mobile hamburger header */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  z-index: 200;
+}
+.mobile-logo {
+  font-size: 16px; font-weight: 600;
+  background: linear-gradient(130deg, var(--c-accent), var(--c-mint));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hamburger {
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; gap: 5px; padding: 4px;
+}
+.hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--c-text); border-radius: 2px;
+  transition: all 0.25s var(--ease-out);
+}
+
+/* Sidebar overlay (mobile) */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 150;
+  opacity: 0; transition: opacity 0.3s;
+}
+.sidebar-overlay.visible {
+  opacity: 1;
+}
+
+/* Profile page main area padding */
+.profile-main { padding: 50px 50px 50px 50px; overflow-y: auto; }
+
+@media (max-width: 768px) {
+  .mobile-header { display: flex; }
+  .app-container { padding-top: 52px; }
+
+  .sidebar {
+    position: fixed;
+    top: 52px; left: 0; bottom: 0;
+    z-index: 160;
+    transform: translateX(-110%);
+    transition: transform 0.3s var(--ease-out);
+    overflow-y: auto;
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay { display: block; }
+
+  .main-area { padding: 24px 18px; }
+  .support-grid { grid-template-columns: 1fr 1fr; }
+  .profile-main { padding: 24px 18px; }
+}
+
+@media (max-width: 480px) {
+  .support-grid { grid-template-columns: 1fr; }
+  .mood-section { width: 100%; }
+}
