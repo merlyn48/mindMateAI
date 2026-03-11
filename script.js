@@ -378,9 +378,9 @@ function pick(arr, key) {
 /* ================================================================
    MAIN REPLY GENERATOR
    ================================================================ */
-let state = { topic: null, turn: 0, lastBot: null };
+/* state is now per-chat only — stored in sessionStorage keyed by chatId */
 
-function generateReply(text) {
+function generateReply(text, state) {
   const lower    = text.toLowerCase().trim();
   const intent   = detectIntent(text);
   const followUp = isFollowUp(text);
@@ -480,13 +480,12 @@ function generateReply(text) {
    AI WRAPPER — restores state, adds 3-second typing delay
    ================================================================ */
 async function getAIReply(userMessage, chatId) {
-  const savedState = safeParseJSON(sessionStorage.getItem("mm_state_" + chatId), null);
-  if (savedState) {
-    state.topic = savedState.topic;
-    state.turn  = savedState.turn;
-  }
+  /* Load this chat's own state — completely isolated from other chats */
+  const state = safeParseJSON(sessionStorage.getItem("mm_state_" + chatId), { topic: null, turn: 0 });
 
-  const reply = generateReply(userMessage);
+  const reply = generateReply(userMessage, state);
+
+  /* Save updated state back under this chat's key only */
   sessionStorage.setItem("mm_state_" + chatId, JSON.stringify({ topic: state.topic, turn: state.turn }));
 
   await new Promise(resolve => setTimeout(resolve, 3000));
