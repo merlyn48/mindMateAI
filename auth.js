@@ -1,13 +1,9 @@
 /* ================================================================
-   MindMate AI — Auth  v3.0
-   Improvements:
-   - Password hashing via SHA-256 (Web Crypto API) — no plaintext
-   - Multi-user support: each user stored individually by email key
-   - Input validation with clear error messages
-   - XSS-safe: all DOM writes use textContent
+   MindMate AI — Auth  v3.1
+   Fix: Enter key listener now only activates on login/register pages,
+        not on every page (was triggering "fill all fields" in chat)
    ================================================================ */
 
-/* ── Simple SHA-256 via Web Crypto ─────────────────────────── */
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + "mindmate_salt_2024");
@@ -16,7 +12,6 @@ async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-/* ── Safe localStorage helpers ─────────────────────────────── */
 function safeGetJSON(key, fallback = null) {
   try {
     const val = localStorage.getItem(key);
@@ -26,7 +21,6 @@ function safeGetJSON(key, fallback = null) {
   }
 }
 
-/* ── Register ───────────────────────────────────────────────── */
 async function register() {
   const name     = document.getElementById("name")?.value?.trim();
   const email    = document.getElementById("email")?.value?.trim().toLowerCase();
@@ -49,7 +43,6 @@ async function register() {
     return;
   }
 
-  // Check if email already registered
   const existingUser = safeGetJSON("mindmate_user_" + email);
   if (existingUser) {
     showToast("An account with this email already exists", "error");
@@ -58,13 +51,11 @@ async function register() {
 
   const passwordHash = await hashPassword(password);
   const user = { name, email, passwordHash, createdAt: Date.now() };
-
   localStorage.setItem("mindmate_user_" + email, JSON.stringify(user));
-  showToast("Account created successfully! Redirecting…", "success");
+  showToast("Account created! Redirecting…", "success");
   setTimeout(() => { window.location.href = "login.html"; }, 1200);
 }
 
-/* ── Login ──────────────────────────────────────────────────── */
 async function login() {
   const email    = document.getElementById("email")?.value?.trim().toLowerCase();
   const password = document.getElementById("password")?.value;
@@ -92,15 +83,18 @@ async function login() {
   setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
 }
 
-/* ── Logout ─────────────────────────────────────────────────── */
 function logout() {
   localStorage.removeItem("loggedInUser");
   localStorage.removeItem("loggedInEmail");
   window.location.href = "login.html";
 }
 
-/* ── Enter key support ──────────────────────────────────────── */
+/* ── Enter key — ONLY on auth pages (login.html / register.html) ── */
 document.addEventListener("DOMContentLoaded", () => {
+  const page = location.pathname.split("/").pop();
+  const isAuthPage = page === "login.html" || page === "register.html";
+  if (!isAuthPage) return; // Do not attach on chat, dashboard, or any other page
+
   document.querySelectorAll("input").forEach(input => {
     input.addEventListener("keypress", e => {
       if (e.key === "Enter") {
