@@ -1,243 +1,250 @@
 /* ================================================================
-   MindMate AI — Calm Audio Engine  v4.0
+   MindMate AI — Calm Audio Engine  v5.0
 
-   FIXES:
-   - Audio no longer stops on page navigation — it resumes instantly
-     on every new page load (< 0.4s fade, feels seamless)
-   - Gesture listener is ONLY on the button itself, never on
-     random page elements (was triggering on any click before)
-   - AudioContext is built fresh each page but state is persisted
-     via localStorage — volume, on/off, and position all restored
+   COMPLETE REDESIGN — no oscillators, no tones, no chords.
+   Previous versions caused headaches from constant harmonic
+   frequencies. This version uses only shaped noise to simulate:
 
-   SOUND DESIGN — layered calming soundscape:
-   - Sub-bass sine drone (F2 / 87Hz) — grounding, warm
-   - Slow breathing-rhythm tremolo on a soft pad chord (F3/C4/A4)
-   - Pink noise "forest air" — very gentle, high-shelf filtered
-   - Slow harmonic shimmer: two detuned sines drifting in/out of
-     phase on a 14-second cycle — creates a sense of gentle motion
-   - All layers shaped through a warm low-pass + soft limiter
+   SOUNDSCAPE: "Soft Rain on Leaves"
+   - Layer 1: Gentle rainfall — pink noise band-passed to the
+     sweet 800–3000 Hz "rain" frequency range
+   - Layer 2: Distant soft rain — lower, fuller noise bed
+   - Layer 3: Occasional random "droplet" micro-bursts — short
+     filtered noise pops at random intervals (0.4–1.8s apart)
+     that simulate individual drops on a surface
+   - Layer 4: Very soft low-frequency "room air" — sub-200Hz
+     noise almost inaudible, just fills the space
+
+   No tones. No music. No beats. Purely textural — the kind of
+   sound that disappears into the background and lets you breathe.
+
+   Cross-page consistency: resumes in < 0.5s on any new page
+   interaction. Button-only toggle — no random restart on clicks.
    ================================================================ */
 
 (function () {
 
-  /* ── State ──────────────────────────────────────────────── */
-  let ctx         = null;
-  let master      = null;
-  let isPlaying   = false;
-  let btnEl       = null;
-  let gestureReady = false;
+  let ctx       = null;
+  let master    = null;
+  let isPlaying = false;
+  let btnEl     = null;
+  let dropTimer = null;
 
   const STORAGE_KEY  = 'mm_audio';
-  const RESUME_DELAY = 400; // ms — fast enough to feel seamless on page load
+  const TARGET_GAIN  = 0.62;
 
-  /* ── Core audio graph builder ───────────────────────────── */
+  /* ── Build the rain soundscape ──────────────────────────── */
   function buildGraph() {
     if (ctx) return;
-
     ctx    = new (window.AudioContext || window.webkitAudioContext)();
     master = ctx.createGain();
     master.gain.setValueAtTime(0, ctx.currentTime);
 
-    /* Warm low-pass — cuts harsh highs, keeps it cosy */
-    const lpf = ctx.createBiquadFilter();
-    lpf.type            = 'lowpass';
-    lpf.frequency.value = 1100;
-    lpf.Q.value         = 0.5;
-
-    /* Soft limiter / compressor to glue layers */
+    /* Final soft limiter */
     const comp = ctx.createDynamicsCompressor();
-    comp.threshold.setValueAtTime(-18, ctx.currentTime);
-    comp.knee.setValueAtTime(12,       ctx.currentTime);
-    comp.ratio.setValueAtTime(3,       ctx.currentTime);
-    comp.attack.setValueAtTime(0.05,   ctx.currentTime);
-    comp.release.setValueAtTime(0.4,   ctx.currentTime);
-
-    /* Chain: sources → lpf → comp → master → output */
-    lpf.connect(comp);
+    comp.threshold.setValueAtTime(-12, ctx.currentTime);
+    comp.knee.setValueAtTime(6,        ctx.currentTime);
+    comp.ratio.setValueAtTime(4,       ctx.currentTime);
+    comp.attack.setValueAtTime(0.003,  ctx.currentTime);
+    comp.release.setValueAtTime(0.25,  ctx.currentTime);
     comp.connect(master);
     master.connect(ctx.destination);
 
-    /* ── Layer 1: Sub-bass drone (F2, 87.3 Hz) ──────────── */
-    /* Deep, grounding sine — barely audible but felt */
-    const drone = ctx.createOscillator();
-    drone.type            = 'sine';
-    drone.frequency.value = 87.3;
-    const droneGain = ctx.createGain();
-    droneGain.gain.value = 0.18;
-    drone.connect(droneGain);
-    droneGain.connect(lpf);
-    drone.start();
+    /* ── Helper: make a looping pink-noise buffer ────────── */
+    function makePinkNoise(seconds, stereo) {
+      const sr      = ctx.sampleRate;
+      const length  = Math.floor(sr * seconds);
+      const channels = stereo ? 2 : 1;
+      const buf     = ctx.createBuffer(channels, length, sr);
 
-    /* ── Layer 2: Soft pad chord ─────────────────────────── */
-    /* F3 (174.6), C4 (261.6), A4 (440) — an Fmaj chord */
-    /* Each oscillator has a very slow LFO tremolo (breathing) */
-    const padNotes = [
-      { freq: 174.6, detune: -3,  vol: 0.07 },
-      { freq: 261.6, detune:  2,  vol: 0.06 },
-      { freq: 440.0, detune: -5,  vol: 0.04 },
-      { freq: 523.2, detune:  4,  vol: 0.03 }, /* C5 — upper shimmer */
-    ];
-
-    padNotes.forEach((n, i) => {
-      const osc = ctx.createOscillator();
-      osc.type            = 'sine';
-      osc.frequency.value = n.freq;
-      osc.detune.value    = n.detune;
-
-      /* Per-voice gain */
-      const vGain = ctx.createGain();
-      vGain.gain.value = n.vol;
-
-      /* Slow tremolo LFO — breathing rhythm (~0.07 Hz = ~14s cycle) */
-      const lfo = ctx.createOscillator();
-      lfo.type            = 'sine';
-      lfo.frequency.value = 0.065 + i * 0.008; /* slightly offset per voice */
-
-      const lfoDepth = ctx.createGain();
-      lfoDepth.gain.value = n.vol * 0.35; /* ±35% of voice gain */
-
-      /* LFO modulates gain: gain.value + lfoDepth */
-      lfo.connect(lfoDepth);
-      lfoDepth.connect(vGain.gain);
-
-      osc.connect(vGain);
-      vGain.connect(lpf);
-      osc.start();
-      lfo.start();
-    });
-
-    /* ── Layer 3: Harmonic shimmer pair ─────────────────── */
-    /* Two sines very close in frequency drift in/out of phase */
-    /* Creates a gentle, slow beating sensation — like rippling water */
-    const shimmerPairs = [
-      { f: 523.25, detune1: 0, detune2: 3.5 }, /* C5 pair */
-      { f: 392.00, detune1: 0, detune2: 2.8 }, /* G4 pair */
-    ];
-    shimmerPairs.forEach(p => {
-      [p.detune1, p.detune2].forEach(det => {
-        const o = ctx.createOscillator();
-        o.type            = 'sine';
-        o.frequency.value = p.f;
-        o.detune.value    = det;
-        const g = ctx.createGain();
-        g.gain.value = 0.022;
-        o.connect(g);
-        g.connect(lpf);
-        o.start();
-      });
-    });
-
-    /* ── Layer 4: Pink noise — "forest air" ─────────────── */
-    /* Generated in a 6-second looping buffer */
-    const sr  = ctx.sampleRate;
-    const buf = ctx.createBuffer(2, sr * 6, sr); /* stereo for width */
-
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
-      for (let i = 0; i < d.length; i++) {
-        const w = Math.random() * 2 - 1;
-        b0=0.99886*b0+w*0.0555179;
-        b1=0.99332*b1+w*0.0750759;
-        b2=0.96900*b2+w*0.1538520;
-        b3=0.86650*b3+w*0.3104856;
-        b4=0.55000*b4+w*0.5329522;
-        b5=-0.7616*b5-w*0.0168980;
-        d[i] = (b0+b1+b2+b3+b4+b5+w*0.5362) / 7 * 0.055;
+      for (let ch = 0; ch < channels; ch++) {
+        const d = buf.getChannelData(ch);
+        let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+        for (let i = 0; i < length; i++) {
+          const w = Math.random() * 2 - 1;
+          b0 = 0.99886*b0 + w*0.0555179;
+          b1 = 0.99332*b1 + w*0.0750759;
+          b2 = 0.96900*b2 + w*0.1538520;
+          b3 = 0.86650*b3 + w*0.3104856;
+          b4 = 0.55000*b4 + w*0.5329522;
+          b5 = -0.7616*b5 - w*0.0168980;
+          b6 = w * 0.115926;
+          d[i] = (b0+b1+b2+b3+b4+b5+b6) / 7;
+          /* Slightly different phase per channel for stereo width */
+          if (ch === 1 && i > 0) d[i] = d[i] * 0.98 + d[i-1] * 0.02;
+        }
       }
+      return buf;
     }
 
-    const noise = ctx.createBufferSource();
-    noise.buffer = buf;
-    noise.loop   = true;
+    /* ── Layer 1: Main rainfall (stereo, 8s loop) ────────── */
+    /* Band-pass centred ~1.4kHz — the natural frequency of rain */
+    const rainBuf = makePinkNoise(8, true);
+    const rain    = ctx.createBufferSource();
+    rain.buffer   = rainBuf;
+    rain.loop     = true;
 
-    /* High-shelf cut to soften the noise — keeps only the
-       airy low-mid texture, not hissy high frequencies */
-    const hpf = ctx.createBiquadFilter();
-    hpf.type            = 'highshelf';
-    hpf.frequency.value = 3000;
-    hpf.gain.value      = -14; /* dB — cuts harshness */
+    const rainBP = ctx.createBiquadFilter();
+    rainBP.type            = 'bandpass';
+    rainBP.frequency.value = 1400;
+    rainBP.Q.value         = 0.7; /* Wide band — natural rain spread */
 
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.12;
+    /* Slight high-shelf cut so it doesn't sibilate */
+    const rainHS = ctx.createBiquadFilter();
+    rainHS.type            = 'highshelf';
+    rainHS.frequency.value = 4000;
+    rainHS.gain.value      = -9;
 
-    noise.connect(hpf);
-    hpf.connect(noiseGain);
-    noiseGain.connect(lpf);
-    noise.start();
+    const rainGain = ctx.createGain();
+    rainGain.gain.value = 0.55;
+
+    rain.connect(rainBP);
+    rainBP.connect(rainHS);
+    rainHS.connect(rainGain);
+    rainGain.connect(comp);
+    rain.start();
+
+    /* ── Layer 2: Distant rain bed (mono, 5s loop) ───────── */
+    /* Lower, fuller — fills in the body under the main rain */
+    const bedBuf = makePinkNoise(5, false);
+    const bed    = ctx.createBufferSource();
+    bed.buffer   = bedBuf;
+    bed.loop     = true;
+
+    const bedLP = ctx.createBiquadFilter();
+    bedLP.type            = 'lowpass';
+    bedLP.frequency.value = 700;
+    bedLP.Q.value         = 0.5;
+
+    const bedGain = ctx.createGain();
+    bedGain.gain.value = 0.28;
+
+    bed.connect(bedLP);
+    bedLP.connect(bedGain);
+    bedGain.connect(comp);
+    bed.start();
+
+    /* ── Layer 3: Room air / soft wind (mono, 11s loop) ──── */
+    /* Very low sub-200Hz — barely there, just fills the room */
+    const airBuf = makePinkNoise(11, false);
+    const air    = ctx.createBufferSource();
+    air.buffer   = airBuf;
+    air.loop     = true;
+
+    const airLP = ctx.createBiquadFilter();
+    airLP.type            = 'lowpass';
+    airLP.frequency.value = 180;
+    airLP.Q.value         = 0.3;
+
+    const airGain = ctx.createGain();
+    airGain.gain.value = 0.18;
+
+    air.connect(airLP);
+    airLP.connect(airGain);
+    airGain.connect(comp);
+    air.start();
+
+    /* ── Layer 4: Random droplets ────────────────────────── */
+    /* Short filtered noise bursts at random intervals.
+       Each "droplet" is a tiny noise buffer with a fast
+       attack and exponential decay — just like a real raindrop. */
+    const dropBuf = makePinkNoise(0.12, false);
+
+    function scheduleDroplet() {
+      if (!isPlaying) return;
+
+      const drop = ctx.createBufferSource();
+      drop.buffer = dropBuf;
+
+      /* Band-pass each droplet slightly differently for variety */
+      const bp = ctx.createBiquadFilter();
+      bp.type            = 'bandpass';
+      bp.frequency.value = 900 + Math.random() * 2200; /* 900–3100 Hz */
+      bp.Q.value         = 2.5 + Math.random() * 3;
+
+      const g = ctx.createGain();
+      const vol = 0.015 + Math.random() * 0.04;
+      g.gain.setValueAtTime(0, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08 + Math.random() * 0.06);
+
+      drop.connect(bp);
+      bp.connect(g);
+      g.connect(comp);
+      drop.start();
+
+      /* Next droplet in 0.25–1.4 seconds */
+      const nextIn = 250 + Math.random() * 1150;
+      dropTimer = setTimeout(scheduleDroplet, nextIn);
+    }
+
+    /* Start droplets after a short delay so they don't front-load */
+    dropTimer = setTimeout(scheduleDroplet, 800);
   }
 
-  /* ── Fade in/out ────────────────────────────────────────── */
-  function fadeIn(duration) {
-    const dur = duration ?? 3.5;
+  /* ── Fade in / out ──────────────────────────────────────── */
+  function fadeIn(dur) {
+    dur = dur ?? 3.0;
     if (!ctx) buildGraph();
     if (ctx.state === 'suspended') ctx.resume();
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + dur);
+    master.gain.linearRampToValueAtTime(TARGET_GAIN, ctx.currentTime + dur);
     isPlaying = true;
     localStorage.setItem(STORAGE_KEY, 'on');
+    /* Restart droplet scheduler if it stopped */
+    if (!dropTimer) {
+      const drop800 = setTimeout(() => {
+        dropTimer = null;
+        if (isPlaying) scheduleDrop();
+      }, 800);
+    }
     syncUI();
   }
 
-  function fadeOut(duration) {
-    const dur = duration ?? 2.0;
+  function fadeOut(dur) {
+    dur = dur ?? 2.0;
     if (!ctx) return;
     master.gain.cancelScheduledValues(ctx.currentTime);
     master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
     master.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
     isPlaying = false;
+    if (dropTimer) { clearTimeout(dropTimer); dropTimer = null; }
     localStorage.setItem(STORAGE_KEY, 'off');
     syncUI();
   }
 
-  /* ── UI sync ─────────────────────────────────────────────── */
+  /* ── UI ─────────────────────────────────────────────────── */
   function syncUI() {
     if (!btnEl) btnEl = document.getElementById('audioToggle');
     if (!btnEl) return;
-    if (isPlaying) {
-      btnEl.textContent = '🔊 Audio On';
-      btnEl.classList.add('audio-on');
-    } else {
-      btnEl.textContent = '🎵 Calm Audio';
-      btnEl.classList.remove('audio-on');
-    }
+    btnEl.textContent = isPlaying ? '🌧 Rain On' : '🌧 Calm Rain';
+    btnEl.classList.toggle('audio-on', isPlaying);
+  }
+
+  /* ── Cross-page resume ──────────────────────────────────── */
+  /* Audio context dies on navigation. This listener waits for
+     the first trusted user interaction on the new page, then
+     rebuilds the graph and fades back in quickly (0.5s).
+     It fires ONCE and removes itself — cannot trigger again. */
+  function resumeOnFirstInteraction(e) {
+    if (!e.isTrusted) return;
+    document.removeEventListener('click',      resumeOnFirstInteraction, true);
+    document.removeEventListener('keydown',    resumeOnFirstInteraction, true);
+    document.removeEventListener('touchstart', resumeOnFirstInteraction, true);
+    setTimeout(() => {
+      if (localStorage.getItem(STORAGE_KEY) === 'on') {
+        ctx = null; /* force fresh graph */
+        buildGraph();
+        fadeIn(0.5);
+      }
+    }, 300);
   }
 
   /* ── Button handler ─────────────────────────────────────── */
+  /* ONLY the button toggles audio — never any other element */
   function onButtonClick() {
-    /* First click ever — browser requires a user gesture to start AudioContext.
-       This listener is ONLY on the button, never on the whole document.
-       This was the bug causing random restarts on any page click before. */
-    if (!gestureReady) {
-      gestureReady = true;
-    }
-    if (isPlaying) {
-      fadeOut();
-    } else {
-      fadeIn();
-    }
-  }
-
-  /* ── Page-load resume ───────────────────────────────────── */
-  /* When the user navigates to a new page and audio was 'on',
-     we resume as soon as any interaction happens on the new page.
-     We use a NAMED function so we can remove it properly and avoid
-     it firing on anything other than the very first interaction. */
-  function resumeOnFirstInteraction(e) {
-    /* Only resume if it's a real user gesture (not synthetic) */
-    if (!e.isTrusted) return;
-    /* Remove ourselves immediately so we only fire once */
-    document.removeEventListener('click',   resumeOnFirstInteraction, true);
-    document.removeEventListener('keydown', resumeOnFirstInteraction, true);
-    document.removeEventListener('touchstart', resumeOnFirstInteraction, true);
-    /* Short delay so page feels fully loaded before audio swells in */
-    setTimeout(() => {
-      if (localStorage.getItem(STORAGE_KEY) === 'on') {
-        buildGraph();
-        fadeIn(0.6); /* Very fast fade-in — feels like it never stopped */
-      }
-    }, RESUME_DELAY);
+    isPlaying ? fadeOut() : fadeIn();
   }
 
   /* ── Init ───────────────────────────────────────────────── */
@@ -247,21 +254,19 @@
 
     syncUI();
 
-    /* Attach toggle — ONLY to the button */
     if (btnEl) {
-      /* Remove any old listener clones before adding */
+      /* Clone to wipe any old listeners from previous page loads */
       const fresh = btnEl.cloneNode(true);
       btnEl.parentNode.replaceChild(fresh, btnEl);
       btnEl = fresh;
       btnEl.addEventListener('click', onButtonClick);
     }
 
-    /* If audio was on, set up a one-time cross-page resume listener.
-       Uses capture phase so it fires before anything else on the page. */
+    /* Register cross-page resume — only if audio was already on */
     if (isPlaying) {
-      document.addEventListener('click',     resumeOnFirstInteraction, { capture: true, once: true });
-      document.addEventListener('keydown',   resumeOnFirstInteraction, { capture: true, once: true });
-      document.addEventListener('touchstart',resumeOnFirstInteraction, { capture: true, once: true });
+      document.addEventListener('click',      resumeOnFirstInteraction, { capture: true, once: true });
+      document.addEventListener('keydown',    resumeOnFirstInteraction, { capture: true, once: true });
+      document.addEventListener('touchstart', resumeOnFirstInteraction, { capture: true, once: true });
     }
   }
 
