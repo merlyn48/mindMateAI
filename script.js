@@ -130,6 +130,17 @@ const INTENTS = {
       { words: ["passion","interest","talent","skill","strength","calling"], w: 1 },
     ]
   },
+
+  /* POSITIVE / HAPPY — so the bot doesn't respond to good news with confusion */
+  happy: {
+    threshold: 2,
+    patterns: [
+      { words: ["happy","happiness","great","amazing","wonderful","fantastic","excellent","brilliant"], w: 3 },
+      { words: ["good","well","fine","better","much better","feeling good","feeling great","feeling happy"], w: 2 },
+      { words: ["excited","excited about","looking forward","can't wait","thrilled","cheerful","content","relieved"], w: 2 },
+      { words: ["positive","confident","proud","grateful","thankful","hopeful","peaceful","calm","relaxed"], w: 2 },
+    ]
+  },
 };
 
 function scoreIntent(text, key) {
@@ -171,6 +182,13 @@ const R = {
     "Hi there 🌿 I'm really glad you're here. How are you feeling today?",
     "Hello! It's good to see you. What's been on your mind lately?",
     "Hey 😊 I'm here and I'm listening. How's your day going so far?"
+  ],
+  happy: [
+    "That's really lovely to hear 😊 What's been making you feel that way?",
+    "I'm so glad! 🌿 Good days deserve to be appreciated. What's going well for you?",
+    "That genuinely makes me happy to hear 💜 What's been good today?",
+    "Love that energy! 😊 What's been lifting you up lately?",
+    "You deserve to feel this way 🌸 Tell me more about what's going on!",
   ],
   goodbye:   [
     "Take care of yourself 💜 I'm always here when you need to talk.",
@@ -357,10 +375,14 @@ const R = {
   },
 
   unknown: [
-    "I hear you. Can you tell me a little more about what's going on? I want to make sure I understand properly.",
-    "That sounds like it matters to you. Can you share a bit more about what you mean?",
     "I'm listening 🌿 What's been on your mind the most lately?",
-    "Tell me more — I want to understand what you're going through."
+    "Tell me a little more — I want to make sure I understand what you're going through.",
+    "I'm here with you. What would feel most useful to talk about right now?",
+    "That's interesting — can you say a bit more about what you mean?",
+    "I'd love to understand better. What's going on for you?",
+    "Sometimes it's hard to put into words — just say whatever comes naturally 💜",
+    "I'm all ears 🌿 What's been sitting with you lately?",
+    "What's the main thing on your mind today?",
   ],
 };
 
@@ -474,6 +496,21 @@ function generateReply(text, state) {
 
   if (intent === "goodbye")  { state.topic = null; state.turn = 0; return pick(R.goodbye, "bye"); }
   if (intent === "gratitude") return pick(R.gratitude, "grat");
+
+  /* Happy/positive — acknowledge warmly before any topic logic.
+     Must come BEFORE greeting check so "I'm feeling happy" doesn't
+     trigger a generic "how are you feeling?" response. */
+  if (intent === "happy" && !state.topic) return pick(R.happy, "happy");
+  if (intent === "happy" && state.topic) {
+    /* User is feeling better mid-conversation — acknowledge it genuinely */
+    const goodMidConvo = [
+      "That's so good to hear 😊 It sounds like things are shifting a little. What's helped?",
+      "I'm really glad 💜 Does that mean things are feeling a bit lighter today?",
+      "That's wonderful — hold onto that feeling 🌿 What's been making the difference?",
+    ];
+    return pick(goodMidConvo, "happy_mid");
+  }
+
   if (intent === "greeting" && !state.topic) return pick(R.greeting, "greet");
 
   if (intent !== "unknown" && intent !== "greeting" && intent !== "gratitude") {
