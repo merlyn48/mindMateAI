@@ -2,9 +2,6 @@
    MindMate AI — Calm Audio Engine  v5.0
 
    COMPLETE REDESIGN — no oscillators, no tones, no chords.
-   Previous versions caused headaches from constant harmonic
-   frequencies. This version uses only shaped noise to simulate:
-
    SOUNDSCAPE: "Soft Rain on Leaves"
    - Layer 1: Gentle rainfall — pink noise band-passed to the
      sweet 800–3000 Hz "rain" frequency range
