@@ -364,15 +364,97 @@ const R = {
   ],
 };
 
-const _used = {};
+/* Non-repeating pick — exhausts all options before cycling,
+   and never starts the next cycle with the same item it ended on */
+const _queues = {};
 function pick(arr, key) {
   if (!Array.isArray(arr)) return arr;
-  if (!_used[key]) _used[key] = [];
-  let avail = arr.map((_, i) => i).filter(i => !_used[key].includes(i));
-  if (!avail.length) { _used[key] = []; avail = arr.map((_, i) => i); }
-  const idx = avail[Math.floor(Math.random() * avail.length)];
-  _used[key].push(idx);
+  if (arr.length === 1) return arr[0];
+  if (!_queues[key] || _queues[key].length === 0) {
+    /* Shuffle all indices */
+    const indices = arr.map((_, i) => i).sort(() => Math.random() - 0.5);
+    /* Avoid starting new cycle with last used item */
+    const lastUsed = _queues[key + '_last'];
+    if (lastUsed !== undefined && indices[0] === lastUsed && indices.length > 1) {
+      [indices[0], indices[1]] = [indices[1], indices[0]];
+    }
+    _queues[key] = indices;
+  }
+  const idx = _queues[key].shift();
+  _queues[key + '_last'] = idx;
   return arr[idx];
+}
+
+/* ================================================================
+   CASUAL / FILLER DETECTOR
+   Handles "lol", "haha", "ok", "hmm", emojis, etc. naturally
+   without derailing the conversation topic.
+   ================================================================ */
+const CASUAL_PATTERNS = [
+  { re: /^(lol|lmao|lmfao|haha|hehe|hihi|😂|🤣|😆|xd|xD)[\s!.]*$/i,
+    replies: [
+      "😄 Haha! A little laughter helps too, you know.",
+      "Ha! Good to see you smiling 😄 How are you feeling though?",
+      "😄 Well at least we can laugh a little! Seriously though — how are you doing?",
+    ]
+  },
+  { re: /^(ok|okay|k|kk|sure|alright|aight|yep|yup|yeah|ya|yes|👍|✅)[\s!.]*$/i,
+    replies: [
+      "Great 🌿 Tell me more whenever you're ready.",
+      "I'm here whenever you want to continue.",
+      "No rush — take your time 💜",
+    ]
+  },
+  { re: /^(no|nope|nah|na|not really|😐|🙁|😶)[\s!.]*$/i,
+    replies: [
+      "That's okay. What would feel right to talk about?",
+      "No worries — I'm here either way 🌿",
+      "Alright, no pressure. What's on your mind?",
+    ]
+  },
+  { re: /^(hmm+|hm+|umm+|um+|erm+|uhh+|idk|i don'?t know|not sure|dunno)[\s!.?]*$/i,
+    replies: [
+      "Take your time — there's no rush here 🌿",
+      "That's okay, we can figure it out together. What feels closest to what you're experiencing?",
+      "It's fine not to have the words yet. Just say whatever comes naturally.",
+    ]
+  },
+  { re: /^(wow|omg|oh my|oh no|oh|ah|whoa|woah|damn|seriously|really\??)[\s!.]*$/i,
+    replies: [
+      "Yeah, it can be a lot to take in. How are you feeling right now?",
+      "I hear you. Want to talk through it?",
+      "Tell me more — what's going through your mind?",
+    ]
+  },
+  { re: /^(thanks?|thank you|thx|ty|tysm|appreciate it|👏|🙏)[\s!.]*$/i,
+    replies: [
+      "Always here for you 💜 Is there anything else on your mind?",
+      "Of course 🌿 You deserve the support.",
+      "Anytime. Take good care of yourself 💜",
+    ]
+  },
+  { re: /^[😊🙂😀😁😃😄🥰😍🤗💜💙💚💛🧡❤️🌿✨⭐🌸🌺]+$/,
+    replies: [
+      "💜 Sending that warmth right back to you.",
+      "🌿 Always here.",
+      "😊 That made my day. How are you feeling?",
+    ]
+  },
+  { re: /^(\.+|\?+|!+|…+)$/,
+    replies: [
+      "Take your time 🌿 I'm not going anywhere.",
+      "No rush — whenever you're ready.",
+      "I'm here. Just say whatever feels right.",
+    ]
+  },
+];
+
+function isCasual(text) {
+  const t = text.trim();
+  for (const p of CASUAL_PATTERNS) {
+    if (p.re.test(t)) return p.replies;
+  }
+  return null;
 }
 
 /* ================================================================
@@ -385,6 +467,10 @@ function generateReply(text, state) {
   const intent   = detectIntent(text);
   const followUp = isFollowUp(text);
   const switching = wantsTopicSwitch(text);
+
+  /* Handle casual/filler messages first — keep conversation light */
+  const casualReplies = isCasual(text);
+  if (casualReplies) return pick(casualReplies, "casual_" + text.trim().toLowerCase().replace(/\W/g,""));
 
   if (intent === "goodbye")  { state.topic = null; state.turn = 0; return pick(R.goodbye, "bye"); }
   if (intent === "gratitude") return pick(R.gratitude, "grat");
