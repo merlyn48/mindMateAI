@@ -480,8 +480,165 @@ function isCasual(text) {
 }
 
 /* ================================================================
-   MAIN REPLY GENERATOR
+   MAIN REPLY GENERATOR  v5.0
+   New: emotion blending, memory callbacks, graceful topic wrap
    ================================================================ */
+
+/* ── Topic name map (used in blending + wrap messages) ─────── */
+const TOPIC_NAMES = {
+  stress: "stress", exam_stress: "exam pressure", anxiety: "anxiety",
+  sadness: "how you're feeling", sleep: "sleep", motivation: "motivation", career: "your career path"
+};
+
+/* ── EMOTION BLENDING ───────────────────────────────────────── */
+/* Detects when two topics score above threshold simultaneously.
+   Returns a blended opener if so, otherwise null. */
+function detectBlend(text) {
+  const scores = {};
+  Object.keys(INTENTS).forEach(k => {
+    const s = scoreIntent(text, k);
+    if (s >= INTENTS[k].threshold) scores[k] = s;
+  });
+  const meaningful = Object.keys(scores).filter(k =>
+    !["greeting","goodbye","gratitude","happy"].includes(k)
+  );
+  if (meaningful.length < 2) return null;
+  /* Sort by score, take top 2 */
+  meaningful.sort((a,b) => scores[b] - scores[a]);
+  const [a, b] = meaningful;
+  return { primary: a, secondary: b };
+}
+
+const BLEND_RESPONSES = {
+  "stress+anxiety":     "It sounds like you're carrying both stress and anxiety right now — that's a really heavy combination. Sometimes they feed each other: the pressure builds stress, and stress keeps the anxiety going. Which one feels like it's louder for you right now?",
+  "stress+sadness":     "I'm hearing both stress and a kind of sadness in what you're saying — that's a lot to sit with at once. When we're overwhelmed for long enough, it can start to feel like low mood too. Would you like to start with what's weighing on you most?",
+  "stress+sleep":       "Stress and poor sleep are so tightly connected — stress makes it hard to switch off, and not sleeping makes everything feel more stressful. It can become a cycle. Which came first for you — the stress or the sleep trouble?",
+  "stress+motivation":  "Feeling both stressed and unmotivated often go hand in hand — the pressure can actually freeze us rather than push us forward. Does it feel like you're too overwhelmed to even start things?",
+  "anxiety+sadness":    "That mix of anxiety and low mood is really difficult — it can feel like your mind is racing and flat at the same time. I want to make sure I understand what you're going through. What's been the hardest part lately?",
+  "anxiety+sleep":      "Anxiety and sleep problems are very closely linked — an anxious mind is an alert mind, which is the opposite of what sleep needs. Are you finding your thoughts are especially active at night?",
+  "anxiety+motivation": "When anxiety and motivation issues come together, even small tasks can feel enormous. Is it more that you're avoiding things because they feel scary, or that you just feel drained and empty?",
+  "sadness+sleep":      "Feeling sad and having trouble sleeping often come together — low mood can disrupt sleep, and poor sleep makes everything feel heavier. How long has this been going on for you?",
+  "sadness+motivation": "Low mood and lost motivation are so deeply connected — when we feel sad, it can drain the energy and purpose out of everything. How long have you been feeling this way?",
+  "sleep+motivation":   "Poor sleep and low motivation really do feed each other — it's hard to feel driven when you're exhausted. Are you getting any sleep at all, or is it very broken?",
+};
+
+function getBlendKey(a, b) {
+  const pair = [a, b].map(x =>
+    x === "exam_stress" ? "stress" : x
+  ).sort().join("+");
+  return BLEND_RESPONSES[pair] || null;
+}
+
+/* ── MEMORY CALLBACKS ───────────────────────────────────────── */
+/* When a topic has been mentioned 3+ times across the conversation,
+   the bot notices and reflects it back naturally. */
+const MEMORY_CALLBACKS = {
+  sleep:       [
+    "I've noticed sleep has come up a few times in our conversation — it sounds like it's really affecting you. Is it something that's been going on for a while?",
+    "Sleep keeps coming up as we talk — that tells me it might be more central to how you're feeling than it might seem. How long has your sleep been like this?",
+  ],
+  stress:      [
+    "I've noticed stress keeps weaving through our conversation. It sounds like it's been a persistent presence lately — not just a one-off thing. Would you say that's fair?",
+    "Stress has come up quite a few times as we've been talking. I just want to check in — how long has it been feeling this relentless?",
+  ],
+  anxiety:     [
+    "Anxiety has come up several times in what you've shared. I don't want to gloss over that — it sounds like it's really present for you. What does it feel like on a typical day?",
+    "I'm noticing anxiety is a recurring theme for you. That's worth paying attention to. Does it feel like something that comes and goes, or more constant?",
+  ],
+  sadness:     [
+    "I've noticed a thread of sadness running through our conversation. I want to gently check in — how are you really doing underneath all of this?",
+    "Sadness keeps coming through in what you're sharing. I just want to sit with that for a moment — how long have you been carrying this feeling?",
+  ],
+  motivation:  [
+    "Motivation has come up a few times now. It sounds like it's been a real struggle, not just a passing thing. What did it feel like before — when things felt more manageable?",
+    "I keep hearing the theme of motivation — or the lack of it. Can I ask: is this affecting everything, or are there certain things you still feel okay doing?",
+  ],
+  career:      [
+    "Career uncertainty has woven through our conversation a few times. It sounds like something you're sitting with a lot. Is this something people in your life know you're struggling with?",
+    "I've noticed your career path keeps coming up. That kind of uncertainty can quietly drain a lot of energy. How much mental space is it taking up for you?",
+  ],
+  exam_stress: [
+    "Exams have come up a few times as we've talked. It sounds like the pressure has been building for a while. How far away are they — is it imminent or more on the horizon?",
+    "I keep hearing the weight of exams in what you're sharing. I want to make sure we talk about what's actually making it hard, not just the logistics. What's the worst part of it for you?",
+  ],
+};
+
+function getMemoryCallback(state) {
+  if (!state.topicCounts) return null;
+  for (const [topic, count] of Object.entries(state.topicCounts)) {
+    /* Fire at exactly 3 mentions, once per topic */
+    const callbackKey = "cb_" + topic;
+    if (count === 3 && !state[callbackKey] && MEMORY_CALLBACKS[topic]) {
+      state[callbackKey] = true;
+      return pick(MEMORY_CALLBACKS[topic], "mem_" + topic);
+    }
+  }
+  return null;
+}
+
+/* ── GRACEFUL TOPIC WRAP ────────────────────────────────────── */
+/* After 6+ turns on a topic, offer a natural close */
+const WRAP_RESPONSES = {
+  stress:      "We've talked through quite a bit about what's been stressing you. I hope some of it has helped, even a little. Is there anything else on your mind, or would you like to take a breath and sit with what we've covered?",
+  exam_stress: "We've spent some good time on the exam stress. You've got more tools than you might realise right now 💜 Is there anything else you'd like to talk through, or shall we leave it here for now?",
+  anxiety:     "We've worked through a lot around your anxiety today. Remember — small steps, one breath at a time. Is there anything else you want to explore, or does it feel like a good place to pause?",
+  sadness:     "Thank you for sharing something so personal with me 💜 We've talked through quite a bit. I hope you feel a little less alone with it. Is there anything else on your mind, or do you want to rest here for now?",
+  sleep:       "We've covered a lot of ground around sleep. Even one small change tonight can start shifting things 🌙 Is there anything else you'd like to talk about?",
+  motivation:  "We've explored motivation from a few angles. The main thing I want you to remember is that action creates motivation — not the other way around. Is there anything else you want to dig into?",
+  career:      "We've talked through your career uncertainty from a few directions. These things rarely resolve overnight, but even getting clarity on one small thing can help. Anything else on your mind?",
+};
+
+function getWrapResponse(state) {
+  const t = state.topic;
+  if (!t) return null;
+  if (state.turn >= 6 && !state.wrappedTopics.includes(t) && WRAP_RESPONSES[t]) {
+    state.wrappedTopics.push(t);
+    return WRAP_RESPONSES[t];
+  }
+  return null;
+}
+
+/* ── EXTRA RESPONSE VARIETY ─────────────────────────────────── */
+/* Additional responses added to each topic's encouragement pool
+   so long conversations stay fresh. Merged into R below. */
+const EXTRA = {
+  st_enc: [
+    "Sometimes the most powerful thing you can do is give yourself permission to not have it all figured out right now. What's one thing you could let go of, just for today?",
+    "You're handling more than most people would even acknowledge — the fact you're talking about it says something. What would feel like a small win today?",
+    "Stress often lies to us — it makes temporary things feel permanent. What's one part of this that you know won't still matter in a year?",
+  ],
+  ex_enc: [
+    "You don't have to feel ready to start — you just have to start. Even 10 minutes of revision is 10 minutes more than zero. What's the smallest possible first step?",
+    "The goal isn't to cover everything perfectly — it's to cover enough, well. What's the one topic that would make you feel most prepared if you nailed it?",
+    "Remember, you've prepared for hard things before and gotten through them. What did you do then that helped?",
+  ],
+  anx_re: [
+    "Anxiety convinces us that the worst outcome is the most likely one. But feelings aren't facts. What's a more realistic version of what might happen?",
+    "You're doing the hard thing just by sitting with this instead of running from it. That takes real courage 💜",
+    "Sometimes anxiety is just our brain trying very hard to protect us — overcorrecting, but coming from care. Can you thank that part of yourself, even while asking it to ease up?",
+  ],
+  sad_en: [
+    "Even on the heaviest days, you showed up. That counts for something, even when it doesn't feel like it 💜",
+    "Healing isn't linear. Some days will feel like going backwards — that doesn't mean you are. How are you taking care of yourself today, even in a small way?",
+    "You deserve gentleness — especially from yourself. What's one kind thing you could do for yourself today, however small?",
+  ],
+  sl_en: [
+    "Your body knows how to sleep — sometimes it just needs the conditions to feel safe enough to do it. What does your environment feel like before bed?",
+    "Even 20 minutes of genuine rest — eyes closed, no phone — has real restorative value. Could you try that tonight regardless of whether sleep comes?",
+    "Sleep debt is real, but it's also recoverable. One better night can shift your whole mood. What feels like the one thing most getting in the way right now?",
+  ],
+  mo_en: [
+    "Motivation follows action — not the other way around. You don't have to feel like doing it. You just have to do it for two minutes and see what happens.",
+    "What would you tell a friend who was feeling exactly the way you are right now? Try offering yourself that same kindness.",
+    "Sometimes 'unmotivated' is just 'burned out in disguise'. When did you last do something that genuinely recharged you?",
+  ],
+  ca_en: [
+    "The fact that you're questioning your path means you're taking it seriously — that's more than most people do at your stage.",
+    "Careers aren't a single decision — they're a series of small ones. What's one small, low-stakes step you could take this week to explore your options?",
+    "You don't need to have it all figured out. You just need to know the next step. What do you know for sure, even if it's just one thing?",
+  ],
+};
+
 /* state is now per-chat only — stored in sessionStorage keyed by chatId */
 
 function generateReply(text, state) {
@@ -490,6 +647,10 @@ function generateReply(text, state) {
   const followUp = isFollowUp(text);
   const switching = wantsTopicSwitch(text);
 
+  /* Ensure topicCounts exists */
+  if (!state.topicCounts)   state.topicCounts = {};
+  if (!state.wrappedTopics) state.wrappedTopics = [];
+
   /* Handle casual/filler messages first — keep conversation light */
   const casualReplies = isCasual(text);
   if (casualReplies) return pick(casualReplies, "casual_" + text.trim().toLowerCase().replace(/\W/g,""));
@@ -497,46 +658,74 @@ function generateReply(text, state) {
   if (intent === "goodbye")  { state.topic = null; state.turn = 0; return pick(R.goodbye, "bye"); }
   if (intent === "gratitude") return pick(R.gratitude, "grat");
 
-  /* Happy/positive — acknowledge warmly before any topic logic.
-     Must come BEFORE greeting check so "I'm feeling happy" doesn't
-     trigger a generic "how are you feeling?" response. */
   if (intent === "happy" && !state.topic) return pick(R.happy, "happy");
   if (intent === "happy" && state.topic) {
-    /* User is feeling better mid-conversation — acknowledge it genuinely */
     const goodMidConvo = [
       "That's so good to hear 😊 It sounds like things are shifting a little. What's helped?",
       "I'm really glad 💜 Does that mean things are feeling a bit lighter today?",
       "That's wonderful — hold onto that feeling 🌿 What's been making the difference?",
+      "That makes me happy to hear 🌸 What do you think turned things around?",
     ];
     return pick(goodMidConvo, "happy_mid");
   }
 
   if (intent === "greeting" && !state.topic) return pick(R.greeting, "greet");
 
+  /* ── EMOTION BLENDING ─────────────────────────────────────── */
+  /* Check for two simultaneous emotions before single-topic logic */
+  if (!state.topic || switching) {
+    const blend = detectBlend(text);
+    if (blend) {
+      const blendReply = getBlendKey(blend.primary, blend.secondary);
+      if (blendReply) {
+        /* Set primary topic so follow-ups go somewhere sensible */
+        state.topic = blend.primary;
+        state.turn  = 1;
+        /* Track both topics in memory counts */
+        state.topicCounts[blend.primary] = (state.topicCounts[blend.primary] || 0) + 1;
+        state.topicCounts[blend.secondary] = (state.topicCounts[blend.secondary] || 0) + 1;
+        return blendReply;
+      }
+    }
+  }
+
+  /* ── SINGLE TOPIC ROUTING ─────────────────────────────────── */
   if (intent !== "unknown" && intent !== "greeting" && intent !== "gratitude") {
+    /* Track topic mentions for memory system */
+    state.topicCounts[intent] = (state.topicCounts[intent] || 0) + 1;
+
     if (!state.topic || switching) {
       state.topic = intent; state.turn = 0;
     } else if (intent !== state.topic && !followUp) {
-      const names = {
-        stress: "what's been stressing you", exam_stress: "exams",
-        anxiety: "anxiety", sadness: "how you're feeling",
-        sleep: "sleep", motivation: "motivation", career: "career"
-      };
+      const names = TOPIC_NAMES;
       state.turn++;
+      /* Blend acknowledgement when switching mid-conversation */
+      const blendReply = getBlendKey(state.topic, intent);
+      if (blendReply) return blendReply;
       return `I want to make sure we finish talking about ${names[state.topic] || "this"} first — it sounds important. But I also hear that ${names[intent] || "that"} is on your mind. Shall we stay here, or would you like to switch?`;
     }
   }
 
   if (!state.topic) return pick(R.unknown, "unk");
 
+  /* ── MEMORY CALLBACK CHECK ────────────────────────────────── */
+  const memoryReply = getMemoryCallback(state);
+  if (memoryReply) return memoryReply;
+
   state.turn++;
   const r = R[state.topic];
+
+  /* ── GRACEFUL WRAP CHECK ──────────────────────────────────── */
+  /* Fire at turn 7 (after 6 real exchanges) */
+  if (state.turn === 7) {
+    const wrap = getWrapResponse(state);
+    if (wrap) return wrap;
+  }
 
   switch (state.topic) {
 
     case "stress":
       if (state.turn === 1) return pick(r.opener, "st_op");
-      // After the opener, try to identify the source from what they say
       if (lower.match(/relationship|partner|friend|family|parents|siblings|colleague|someone|people/))
         return pick(r.relationships, "st_rel");
       if (lower.match(/work|job|uni|college|school|deadline|project|assignment|money|finances|health|body/))
@@ -545,7 +734,7 @@ function generateReply(text, state) {
         return pick(r.physical, "st_phy");
       if (lower.match(/help|what do i do|how do i|tips|advice|cope|manage|deal/))
         return pick(r.coping, "st_cop");
-      return pick(r.encouragement, "st_enc");
+      return pick([...r.encouragement, ...EXTRA.st_enc], "st_enc");
 
     case "exam_stress":
       if (state.turn === 1) return pick(r.opener, "ex_op");
@@ -554,14 +743,14 @@ function generateReply(text, state) {
       if (lower.match(/syllabus|so much|too much|a lot|chapters|heavy|overwhelm|don't know where/)) return pick(r.workload, "ex_wk");
       if (lower.match(/pomodoro|technique|tip|strategy|method|how do i|what should/))
         return "The Pomodoro Technique is great — 25 minutes focused, then a 5-minute break. After 4 rounds, take a longer break. It works because it matches your brain's natural attention cycle. Want more study tips?";
-      return pick(r.encouragement, "ex_enc");
+      return pick([...r.encouragement, ...EXTRA.ex_enc], "ex_enc");
 
     case "anxiety":
       if (state.turn === 1) return pick(r.opener, "anx_op");
       if (lower.match(/breath|breathing|can't breathe|chest|heart racing/)) return pick(r.breathing, "anx_br");
       if (lower.match(/ground|technique|something to do|help me now|right now|calm down/)) return pick(r.grounding, "anx_gr");
       if (lower.match(/shak|tremble|sweat|physical|body|dizzy/)) return pick(r.physical, "anx_ph");
-      return pick(r.reassurance, "anx_re");
+      return pick([...r.reassurance, ...EXTRA.anx_re], "anx_re");
 
     case "sadness":
       if (state.turn === 1) return pick(r.opener, "sad_op");
@@ -570,7 +759,7 @@ function generateReply(text, state) {
       if (lower.match(/alone|lonely|no one|nobody|isolated|no friends|left out/)) return pick(r.loneliness, "sad_lo");
       if (lower.match(/hopeless|pointless|what's the point|nothing matters|give up|no point/)) return pick(r.hopelessness, "sad_ho");
       if (state.turn >= 3 && state.turn % 3 === 0) return pick(r.gentle_check, "sad_gc");
-      return pick(r.encouragement, "sad_en");
+      return pick([...r.encouragement, ...EXTRA.sad_en], "sad_en");
 
     case "sleep":
       if (state.turn === 1) return pick(r.opener, "sl_op");
@@ -578,21 +767,21 @@ function generateReply(text, state) {
       if (lower.match(/routine|schedule|same time|habit|wind down/)) return pick(r.routine, "sl_ro");
       if (lower.match(/tired|exhausted|no energy|drained|still tired|waking up tired|groggy/)) return pick(r.tired, "sl_ti");
       if (lower.match(/nightmare|bad dream|dream|wake up scared|night terror/)) return pick(r.nightmares, "sl_nm");
-      return pick(r.encouragement, "sl_en");
+      return pick([...r.encouragement, ...EXTRA.sl_en], "sl_en");
 
     case "motivation":
       if (state.turn === 1) return pick(r.opener, "mo_op");
       if (lower.match(/procrastinat|putting off|keep delaying|avoiding|can't start|can't begin|keep scrolling/)) return pick(r.procrastination, "mo_pr");
       if (lower.match(/don't know what|no direction|lost|no goal|no purpose|what's the point/)) return pick(r.no_goal, "mo_ng");
       if (lower.match(/burnt out|burnout|exhausted|can't anymore|too much|done|finished|depleted/)) return pick(r.burnout, "mo_bu");
-      return pick(r.encouragement, "mo_en");
+      return pick([...r.encouragement, ...EXTRA.mo_en], "mo_en");
 
     case "career":
       if (state.turn === 1) return pick(r.opener, "ca_op");
       if (lower.match(/confused|don't know|no idea|lost|unsure|uncertain|clueless/)) return pick(r.confused, "ca_co");
       if (lower.match(/pressure|parents|family|expect|supposed to|society|they want/)) return pick(r.pressure, "ca_pr");
       if (lower.match(/skill|good at|strength|talent|what am i|what can i|naturally/)) return pick(r.skills, "ca_sk");
-      return pick(r.encouragement, "ca_en");
+      return pick([...r.encouragement, ...EXTRA.ca_en], "ca_en");
 
     default:
       return pick(R.unknown, "unk");
@@ -604,12 +793,22 @@ function generateReply(text, state) {
    ================================================================ */
 async function getAIReply(userMessage, chatId) {
   /* Load this chat's own state — completely isolated from other chats */
-  const state = safeParseJSON(sessionStorage.getItem("mm_state_" + chatId), { topic: null, turn: 0 });
+  const state = safeParseJSON(sessionStorage.getItem("mm_state_" + chatId), {
+    topic: null,
+    turn: 0,
+    topicCounts: {},   /* MEMORY: how many times each topic has been mentioned */
+    wrappedTopics: [], /* WRAP: topics that have been gracefully closed */
+  });
 
   const reply = generateReply(userMessage, state);
 
-  /* Save updated state back under this chat's key only */
-  sessionStorage.setItem("mm_state_" + chatId, JSON.stringify({ topic: state.topic, turn: state.turn }));
+  /* Save full state back */
+  sessionStorage.setItem("mm_state_" + chatId, JSON.stringify({
+    topic:         state.topic,
+    turn:          state.turn,
+    topicCounts:   state.topicCounts,
+    wrappedTopics: state.wrappedTopics,
+  }));
 
   await new Promise(resolve => setTimeout(resolve, 3000));
   return reply;
