@@ -143,8 +143,131 @@ const INTENTS = {
   },
 };
 
+/* ================================================================
+   SPELL CORRECTION — runs before intent detection
+   Two-layer system:
+   1. Common misspelling dictionary (instant, zero false positives)
+   2. Levenshtein fuzzy match against all known keywords (catches
+      anything the dictionary misses — typos, fat-finger errors, etc.)
+   ================================================================ */
+
+/* Layer 1 — hand-curated misspelling dictionary.
+   Covers the most frequent real-world typos for mental health terms. */
+const MISSPELLINGS = {
+  /* stress */
+  "stres":"stress","strees":"stress","stresed":"stressed","stresss":"stress",
+  "stresd":"stressed","sttress":"stress","strss":"stress","sress":"stress",
+  "stessed":"stressed","stresssed":"stressed","stressedd":"stressed",
+  /* anxiety */
+  "axiety":"anxiety","anxety":"anxiety","anxeity":"anxiety","anxiey":"anxiety",
+  "anxity":"anxiety","anixety":"anxiety","anxietu":"anxiety","anxioty":"anxiety",
+  "anxieti":"anxiety","anxeity":"anxiety","anziey":"anxiety","anxious":"anxious",
+  "anxoius":"anxious","anixous":"anxious","anxiuos":"anxious",
+  /* sad / sadness */
+  "sadd":"sad","sadnes":"sadness","sadnss":"sadness","sadnees":"sadness",
+  "deppressed":"depressed","depresed":"depressed","depressd":"depressed",
+  "derpessed":"depressed","depresion":"depression","depresson":"depression",
+  "deprssion":"depression","dpression":"depression","dpressed":"depressed",
+  /* sleep */
+  "slep":"sleep","slepp":"sleep","sllep":"sleep","sleeep":"sleep",
+  "insomnea":"insomnia","insomania":"insomnia","insomia":"insomnia",
+  "insomnia":"insomnia","tierd":"tired","tird":"tired","exausted":"exhausted",
+  "exhasted":"exhausted","exhuasted":"exhausted","exhaustd":"exhausted",
+  /* motivation */
+  "motivaton":"motivation","motivaion":"motivation","motiation":"motivation",
+  "motivatioin":"motivation","motvation":"motivation","motivtaion":"motivation",
+  "procrasinate":"procrastinate","procastinate":"procrastinate",
+  "procrastiniate":"procrastinate","procrastiante":"procrastinate",
+  "procrasitnating":"procrastinating","procrasinating":"procrastinating",
+  "procastinating":"procrastinating","procratinating":"procrastinating",
+  /* exam / study */
+  "exmas":"exams","exasm":"exams","exan":"exam","revison":"revision",
+  "revisoin":"revision","studing":"studying","studyin":"studying",
+  "stufy":"study","stdy":"study","assignmet":"assignment","asignment":"assignment",
+  /* career */
+  "carrer":"career","caeer":"career","carear":"career","careeer":"career",
+  "intreview":"interview","intervew":"interview","interveiw":"interview",
+  /* greetings */
+  "helo":"hello","hllo":"hello","helllo":"hello","heyy":"hey","hihi":"hi",
+  /* goodbye */
+  "byee":"bye","byeee":"bye","goodbuy":"goodbye","goodbey":"goodbye",
+  /* feeling words */
+  "feelign":"feeling","feelling":"feeling","feleing":"feeling","feling":"feeling",
+  "hapyy":"happy","hapy":"happy","happpy":"happy","happyy":"happy",
+  "woried":"worried","worrid":"worried","worreid":"worried","worryed":"worried",
+  "lonly":"lonely","lonley":"lonely","loneley":"lonely","loenly":"lonely",
+  "overwelmed":"overwhelmed","overwhlmed":"overwhelmed","overwhemled":"overwhelmed",
+  "hopeles":"hopeless","hoepless":"hopeless","hopelesss":"hopeless",
+};
+
+/* Layer 2 — Levenshtein distance.
+   Collects every keyword from INTENTS into a flat list,
+   then for each word in user input checks if it's within
+   edit distance 1 or 2 of a known keyword. */
+
+/* Build keyword list once at startup */
+const _allKeywords = (() => {
+  const words = new Set();
+  Object.values(INTENTS).forEach(intent => {
+    intent.patterns.forEach(p => {
+      p.words.forEach(w => {
+        /* Only index single words (multi-word phrases can't be fuzzied safely) */
+        if (!w.includes(" ")) words.add(w);
+      });
+    });
+  });
+  return [...words];
+})();
+
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) =>
+    Array.from({ length: b.length + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+  );
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function fuzzyCorrectWord(word) {
+  /* Skip very short words — too many false positives */
+  if (word.length <= 3) return word;
+  /* Allow distance 1 for short words (4-6 chars), distance 2 for longer */
+  const maxDist = word.length <= 6 ? 1 : 2;
+  let best = null, bestDist = maxDist + 1;
+  for (const kw of _allKeywords) {
+    if (Math.abs(kw.length - word.length) > maxDist) continue; /* fast skip */
+    const d = levenshtein(word, kw);
+    if (d < bestDist) { bestDist = d; best = kw; }
+  }
+  return best || word;
+}
+
+/* Master correction function — call this on raw user input */
+function correctSpelling(text) {
+  return text
+    .toLowerCase()
+    .split(/\b/)
+    .map(token => {
+      const t = token.trim();
+      if (!t || !/^[a-z]+$/.test(t)) return token; /* skip punctuation/spaces */
+      /* Layer 1: dictionary */
+      if (MISSPELLINGS[t]) return MISSPELLINGS[t];
+      /* Layer 2: fuzzy */
+      return fuzzyCorrectWord(t);
+    })
+    .join("");
+}
+
 function scoreIntent(text, key) {
-  const lower = text.toLowerCase();
+  const lower = correctSpelling(text.toLowerCase());
   let score = 0;
   INTENTS[key].patterns.forEach(p => {
     p.words.forEach(w => { if (lower.includes(w)) score += p.w; });
@@ -153,9 +276,10 @@ function scoreIntent(text, key) {
 }
 
 function detectIntent(text) {
+  const corrected = correctSpelling(text.toLowerCase());
   let best = { key: "unknown", score: 0 };
   Object.keys(INTENTS).forEach(key => {
-    const score = scoreIntent(text, key);
+    const score = scoreIntent(corrected, key);
     if (score >= INTENTS[key].threshold && score > best.score) best = { key, score };
   });
   return best.key;
@@ -642,7 +766,7 @@ const EXTRA = {
 /* state is now per-chat only — stored in sessionStorage keyed by chatId */
 
 function generateReply(text, state) {
-  const lower    = text.toLowerCase().trim();
+  const lower    = correctSpelling(text.toLowerCase().trim());
   const intent   = detectIntent(text);
   const followUp = isFollowUp(text);
   const switching = wantsTopicSwitch(text);
