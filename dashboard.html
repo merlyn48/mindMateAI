@@ -6,6 +6,142 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ── Mood Trend Chart ─────────────────────────────────── */
+    .mood-trend-section {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .mood-trend-section h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .mood-trend-section .subtitle {
+      font-size: 12px;
+      color: var(--c-muted);
+      margin-bottom: 20px;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 120px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .chart-bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .chart-bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      transition: height 0.5s cubic-bezier(.34,1.56,.64,1);
+      min-height: 4px;
+      position: relative;
+    }
+    .chart-bar.no-data {
+      background: var(--c-border);
+      opacity: 0.4;
+      height: 4px !important;
+    }
+    .chart-bar.score-high  { background: linear-gradient(180deg,#4ade80,#22c55e); }
+    .chart-bar.score-mid   { background: linear-gradient(180deg,#fbbf24,#f59e0b); }
+    .chart-bar.score-low   { background: linear-gradient(180deg,#f87171,#ef4444); }
+    .chart-label {
+      font-size: 10px;
+      color: var(--c-muted);
+      font-family: var(--font-mono, 'DM Mono', monospace);
+    }
+    .chart-score {
+      font-size: 10px;
+      color: var(--c-muted);
+      font-family: var(--font-mono, 'DM Mono', monospace);
+      font-weight: 500;
+    }
+    .trend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 14px;
+    }
+    .trend-badge.improving { background: #dcfce7; color: #15803d; }
+    .trend-badge.declining { background: #fee2e2; color: #b91c1c; }
+    .trend-badge.stable    { background: #f1f5f9; color: #64748b; }
+
+    /* ── Recommendation Panel ──────────────────────────────── */
+    .recs-section {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .recs-section h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .recs-section .subtitle {
+      font-size: 12px;
+      color: var(--c-muted);
+      margin-bottom: 16px;
+    }
+    .rec-card {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 1px solid var(--c-border);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .rec-card:hover { background: var(--c-bg); border-color: var(--c-accent); }
+    .rec-card.urgency-critical { border-left: 3px solid #ef4444; background: #fff5f5; }
+    .rec-card.urgency-high     { border-left: 3px solid #f59e0b; }
+    .rec-card.urgency-medium   { border-left: 3px solid var(--c-accent, #7c6af7); }
+    .rec-card.urgency-low      { border-left: 3px solid #94a3b8; }
+    .rec-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+    .rec-content { flex: 1; }
+    .rec-label { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .rec-desc  { font-size: 12px; color: var(--c-muted); line-height: 1.5; }
+    .rec-empty { font-size: 13px; color: var(--c-muted); text-align: center; padding: 20px 0; }
+
+    /* ── Wellness Score Ring ───────────────────────────────── */
+    .wellness-ring-wrap {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .wellness-ring {
+      flex-shrink: 0;
+    }
+    .ring-text {
+      font-size: 13px;
+    }
+    .ring-score {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .ring-label {
+      font-size: 11px;
+      color: var(--c-muted);
+    }
+  </style>
 </head>
 <body>
 
@@ -16,10 +152,8 @@
     }
   </script>
 
-  <!-- Mobile sidebar overlay -->
   <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()" aria-hidden="true"></div>
 
-  <!-- Mobile header -->
   <header class="mobile-header" aria-label="Mobile navigation">
     <button class="hamburger" onclick="openSidebar()" aria-label="Open menu" aria-expanded="false" id="hamburgerBtn">
       <span></span><span></span><span></span>
@@ -31,31 +165,26 @@
 
     <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main sidebar">
       <h2 class="logo">MindMate AI</h2>
-
       <div class="sidebar-profile">
         <img id="sidebarAvatar" class="sidebar-avatar" alt="Your avatar">
         <div class="sidebar-user">
           <span id="sidebarName"></span>
         </div>
       </div>
-
       <nav class="nav-main" aria-label="Main navigation">
         <a href="dashboard.html">Dashboard</a>
         <a href="index.html">Chat</a>
       </nav>
-
       <nav class="nav-secondary" aria-label="Account navigation">
         <a href="profile.html">Profile</a>
         <a href="settings.html">Settings</a>
       </nav>
-
       <nav class="nav-info" aria-label="Info pages">
         <a href="about.html">About</a>
         <a href="faq.html">FAQ</a>
         <a href="contact.html">Contact</a>
         <a href="privacy.html">Privacy Policy</a>
       </nav>
-
       <div class="sidebar-footer">
         <button id="audioToggle" class="sidebar-audio-btn" aria-label="Toggle calm audio">🎵 Calm Audio</button>
         <button onclick="logout()" class="logout-btn" aria-label="Log out">Logout</button>
@@ -73,12 +202,42 @@
       <section class="mood-section" aria-labelledby="moodHeading">
         <h3 id="moodHeading">How are you feeling today?</h3>
         <div class="mood-buttons" role="group" aria-label="Mood selection">
-          <button onclick="setMood('happy', this)"  aria-label="Happy">🙂</button>
-          <button onclick="setMood('okay', this)"   aria-label="Okay">😐</button>
+          <button onclick="setMood('happy', this)"   aria-label="Happy">🙂</button>
+          <button onclick="setMood('okay', this)"    aria-label="Okay">😐</button>
           <button onclick="setMood('stressed', this)" aria-label="Stressed">😟</button>
-          <button onclick="setMood('sad', this)"    aria-label="Sad">😔</button>
+          <button onclick="setMood('sad', this)"     aria-label="Sad">😔</button>
         </div>
         <p id="moodResult" aria-live="polite"></p>
+      </section>
+
+      <!-- WELLNESS SCORE + 7-DAY TREND CHART -->
+      <section class="mood-trend-section" aria-labelledby="trendHeading">
+        <h3 id="trendHeading">Your Wellness Trend</h3>
+        <p class="subtitle">Based on your AI chat sessions — scored 0–100</p>
+
+        <div class="wellness-ring-wrap">
+          <svg class="wellness-ring" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+            <circle cx="36" cy="36" r="28" fill="none" stroke="var(--c-border)" stroke-width="8"/>
+            <circle id="ringArc" cx="36" cy="36" r="28" fill="none"
+                    stroke="var(--c-accent, #7c6af7)" stroke-width="8"
+                    stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="175.9"
+                    transform="rotate(-90 36 36)"
+                    style="transition: stroke-dashoffset 1s ease, stroke 0.5s"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-score" id="avgScoreText">—</div>
+            <div class="ring-label">7-day average</div>
+            <div id="trendBadge" class="trend-badge stable" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="chart-wrap" id="trendChart" aria-label="7-day wellness bar chart">
+          <!-- Bars injected by JS -->
+        </div>
+        <div class="week-labels" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span>
+          <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
       </section>
 
       <!-- SUPPORT OPTIONS -->
@@ -91,33 +250,39 @@
             <p>Start a supportive conversation and share what's on your mind.</p>
           </div>
           <div class="support-card" onclick="window.location.href='index.html?topic=stress'" role="button" tabindex="0"
-               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=stress'" aria-label="Manage Stress">
+               aria-label="Manage Stress">
             <h4>🧠 Manage Stress</h4>
             <p>Learn grounding techniques to calm your mind.</p>
           </div>
           <div class="support-card" onclick="window.location.href='index.html?topic=motivation'" role="button" tabindex="0"
-               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=motivation'" aria-label="Study Motivation">
+               aria-label="Study Motivation">
             <h4>📚 Study Motivation</h4>
             <p>Stay focused and productive when studying.</p>
           </div>
           <div class="support-card" onclick="window.location.href='index.html?topic=sleep'" role="button" tabindex="0"
-               onkeypress="if(event.key==='Enter')window.location.href='index.html?topic=sleep'" aria-label="Sleep Support">
+               aria-label="Sleep Support">
             <h4>🌙 Sleep Support</h4>
             <p>Relax your thoughts and improve sleep habits.</p>
           </div>
         </div>
       </section>
 
-      <!-- WELLBEING PROGRESS -->
-      <section class="progress-section" aria-labelledby="progressHeading">
+      <!-- AI-POWERED RECOMMENDATIONS -->
+      <section class="recs-section" aria-labelledby="recsHeading">
+        <h3 id="recsHeading">✨ Today's Recommendations</h3>
+        <p class="subtitle">Personalised based on your recent mood patterns</p>
+        <div id="recsContainer">
+          <p class="rec-empty">Start a chat session to get personalised recommendations 💬</p>
+        </div>
+      </section>
+
+      <!-- LEGACY WEEK TRACKER (kept for backward compat, hidden if new chart works) -->
+      <section class="progress-section" aria-labelledby="progressHeading" style="display:none" id="legacyTracker">
         <h3 id="progressHeading">Your Well-being This Week</h3>
         <div class="week-tracker" role="img" aria-label="Weekly mood tracker">
-          <div class="day" id="day1"></div>
-          <div class="day" id="day2"></div>
-          <div class="day" id="day3"></div>
-          <div class="day" id="day4"></div>
-          <div class="day" id="day5"></div>
-          <div class="day" id="day6"></div>
+          <div class="day" id="day1"></div><div class="day" id="day2"></div>
+          <div class="day" id="day3"></div><div class="day" id="day4"></div>
+          <div class="day" id="day5"></div><div class="day" id="day6"></div>
           <div class="day" id="day7"></div>
         </div>
         <div class="week-labels" aria-hidden="true">
@@ -135,18 +300,19 @@
   <script src="audio.js"></script>
   <script src="effects.js"></script>
 
+  <!-- AI Backend must load before dashboard logic below -->
+  <script src="ai_backend.js"></script>
+
   <script>
-    /* Safe JSON helper */
     function safeParseJSON(val, fallback) {
-      try { return val ? JSON.parse(val) : fallback; }
-      catch { return fallback; }
+      try { return val ? JSON.parse(val) : fallback; } catch { return fallback; }
     }
 
-    /* Set welcome name safely */
+    /* ── Welcome name ──────────────────────────────────── */
     const nameEl = document.getElementById("welcomeName");
     if (nameEl) nameEl.textContent = localStorage.getItem("loggedInUser") || "there";
 
-    /* ── Mood System ── */
+    /* ── Mood System (existing) ─────────────────────────── */
     function setMood(mood, btn) {
       document.querySelectorAll(".mood-buttons button")
         .forEach(b => b.classList.remove("mood-selected"));
@@ -160,38 +326,128 @@
       localStorage.setItem("mindmate_week_moods", JSON.stringify(moodWeek));
 
       const responses = {
-        happy:   "I'm glad you're feeling good today 😊",
-        okay:    "Thanks for checking in. I'm here if you want to talk.",
-        stressed:"I'm sorry you're feeling stressed. Maybe chatting could help.",
-        sad:     "That sounds tough. Remember you're not alone 💜"
+        happy:    "I'm glad you're feeling good today 😊",
+        okay:     "Thanks for checking in. I'm here if you want to talk.",
+        stressed: "I'm sorry you're feeling stressed. Maybe chatting could help.",
+        sad:      "That sounds tough. Remember you're not alone 💜"
       };
-
       const resultEl = document.getElementById("moodResult");
       if (resultEl) resultEl.textContent = responses[mood] || "";
-      updateWeekTracker();
-    }
 
-    /* ── Week Tracker ── */
-    function updateWeekTracker() {
-      const moods = safeParseJSON(localStorage.getItem("mindmate_week_moods"), {});
-      for (let i = 0; i < 7; i++) {
-        const box = document.getElementById("day" + (i + 1));
-        if (!box) continue;
-        box.className = "day";
-        const key = (i + 1) % 7; // Mon=1..Sat=6, Sun=0
-        const mood = moods[key];
-        if (mood) box.classList.add("mood-" + mood);
+      /* Also record in AI tracker if backend available */
+      if (window.MindMateBackend) {
+        const moodScoreMap = { happy: 80, okay: 55, stressed: 30, sad: 25 };
+        const mv = { valence: 0, arousal: 0, dominance: 0, score: moodScoreMap[mood] || 50, dominant: mood, hasCrisis: false };
+        window.MindMateBackend.MoodTracker.record(mv, "dashboard check-in: " + mood);
+        renderRecommendations(mv);
+        renderTrendChart();
       }
     }
 
-    /* ── Restore today's mood on load ── */
+    /* ── Render 7-day trend chart ───────────────────────── */
+    function renderTrendChart() {
+      if (!window.MindMateBackend) return;
+
+      const { scores, summary } = window.MindMateBackend.getWeeklyData();
+      const chart = document.getElementById("trendChart");
+      if (!chart) return;
+
+      chart.innerHTML = "";
+      const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+      const MAX_H = 100;
+
+      scores.forEach((score, i) => {
+        const group = document.createElement("div");
+        group.className = "chart-bar-group";
+
+        const bar = document.createElement("div");
+        if (score === null) {
+          bar.className = "chart-bar no-data";
+          bar.style.height = "4px";
+        } else {
+          const cls = score >= 60 ? "score-high" : score >= 40 ? "score-mid" : "score-low";
+          bar.className = "chart-bar " + cls;
+          bar.style.height = Math.max(4, Math.round(score / 100 * MAX_H)) + "px";
+          bar.title = days[i] + ": " + score + "/100";
+        }
+
+        const scoreLabel = document.createElement("div");
+        scoreLabel.className = "chart-score";
+        scoreLabel.textContent = score !== null ? score : "–";
+
+        group.appendChild(scoreLabel);
+        group.appendChild(bar);
+        chart.appendChild(group);
+      });
+
+      /* Wellness ring */
+      if (summary.averageWellnessScore !== null) {
+        const avgEl = document.getElementById("avgScoreText");
+        if (avgEl) avgEl.textContent = summary.averageWellnessScore;
+
+        /* SVG ring: circumference = 2π×28 ≈ 175.9 */
+        const arc = document.getElementById("ringArc");
+        if (arc) {
+          const offset = 175.9 - (summary.averageWellnessScore / 100) * 175.9;
+          arc.style.strokeDashoffset = offset;
+          const score = summary.averageWellnessScore;
+          arc.style.stroke = score >= 60 ? "#22c55e" : score >= 40 ? "#f59e0b" : "#ef4444";
+        }
+      }
+
+      /* Trend badge */
+      const badge = document.getElementById("trendBadge");
+      if (badge && summary.trend) {
+        const icons = { improving: "↑", declining: "↓", stable: "→" };
+        badge.textContent = icons[summary.trend] + " " + summary.trend.charAt(0).toUpperCase() + summary.trend.slice(1);
+        badge.className = "trend-badge " + summary.trend;
+        badge.style.display = "inline-flex";
+      }
+    }
+
+    /* ── Render recommendation cards ──────────────────── */
+    function renderRecommendations(moodVector) {
+      if (!window.MindMateBackend) return;
+      const container = document.getElementById("recsContainer");
+      if (!container) return;
+
+      const recs = window.MindMateBackend.RecommendEngine.recommend(
+        moodVector,
+        window.MindMateBackend.MoodTracker.summary()
+      );
+
+      if (!recs.length) {
+        container.innerHTML = '<p class="rec-empty">No specific recommendations right now — you seem to be doing okay! 🌿</p>';
+        return;
+      }
+
+      container.innerHTML = "";
+      recs.forEach(rec => {
+        const card = document.createElement("div");
+        card.className = "rec-card urgency-" + rec.urgency;
+
+        /* Split emoji from label text */
+        const emojiMatch = rec.label.match(/^(\S+)\s+(.+)$/);
+        const icon  = emojiMatch ? emojiMatch[1] : "💡";
+        const label = emojiMatch ? emojiMatch[2] : rec.label;
+
+        card.innerHTML = `
+          <div class="rec-icon">${icon}</div>
+          <div class="rec-content">
+            <div class="rec-label">${label}</div>
+            <div class="rec-desc">${rec.desc}</div>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    /* ── Init ───────────────────────────────────────────── */
     window.addEventListener("DOMContentLoaded", () => {
       const mood = localStorage.getItem("mindmate_mood");
       const resultEl = document.getElementById("moodResult");
       if (mood && resultEl) resultEl.textContent = "Today's mood: " + mood;
-      updateWeekTracker();
 
-      // Restore selected mood button
+      /* Restore selected mood button */
       if (mood) {
         document.querySelectorAll(".mood-buttons button").forEach(btn => {
           if (btn.getAttribute("aria-label")?.toLowerCase() === mood) {
@@ -199,9 +455,21 @@
           }
         });
       }
+
+      /* Render chart and recs from historical data */
+      renderTrendChart();
+
+      /* Show last-known mood recommendations if no mood set today */
+      if (window.MindMateBackend) {
+        const recent = window.MindMateBackend.MoodTracker.recent(3);
+        if (recent.length) {
+          const last = recent[recent.length - 1];
+          renderRecommendations({ valence: last.v, arousal: last.a, dominance: last.d, score: last.score, dominant: last.dominant, hasCrisis: last.hasCrisis });
+        }
+      }
     });
 
-    /* Mobile sidebar toggle */
+    /* Mobile sidebar */
     function openSidebar() {
       document.getElementById("sidebar").classList.add("sidebar-open");
       document.getElementById("sidebarOverlay").classList.add("visible");
