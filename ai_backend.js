@@ -1,7 +1,8 @@
 "use strict";
 
-/* Groq API configuration */
-const GROQ_API_KEY = "Your API key heregt";
+/* Groq API configuration — key is loaded from config.js (gitignored) */
+const GROQ_API_KEY = window.GROQ_API_KEY || "";
+if (!GROQ_API_KEY) console.error("[MindMate] ⚠️ No API key found. Create config.js with: window.GROQ_API_KEY = 'your-key';");
 
 const _AI_HEADERS = {
   "Content-Type": "application/json",
