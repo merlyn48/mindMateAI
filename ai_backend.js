@@ -1,7 +1,7 @@
 "use strict";
 
 /* Groq API configuration */
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = "Your API key heregt";
 
 const _AI_HEADERS = {
   "Content-Type": "application/json",
