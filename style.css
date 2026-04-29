@@ -183,7 +183,14 @@ body.dark-mode .sidebar-audio-btn { color:#c4baff;border-color:rgba(156,140,255,
 .logout-btn:active { transform:scale(0.97); }
 
 /* MAIN AREA */
-.main-area { flex:1;padding:52px 60px;overflow-y:auto;max-width:960px; }
+.main-area { flex:1;padding:52px 60px;overflow-y:auto; }
+
+.dashboard-header,
+.mood-section,
+.mood-trend-section,
+.support-section,
+.recs-section,
+.progress-section { max-width:860px; }
 
 .dashboard-header h1 { font-size:32px;font-weight:600;letter-spacing:-0.025em;line-height:1.2;margin-bottom:6px; }
 .dashboard-header p { color:var(--c-muted);font-size:15px; }
@@ -267,7 +274,7 @@ body.dark-mode .sidebar-audio-btn { color:#c4baff;border-color:rgba(156,140,255,
 .mood-sad     { background:linear-gradient(180deg,#c4b8e8,#a89ed6);border-color:rgba(168,158,214,0.5); }
 .day[class*="mood-"] { transform:scaleY(1.04);box-shadow:0 6px 16px rgba(0,0,0,0.08); }
 .week-labels {
-  display:grid;grid-template-columns:repeat(7,1fr);gap:10px;max-width:420px;
+  display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
   margin-top:8px;font-size:12px;font-family:'DM Mono',monospace;color:var(--c-muted);text-align:center;
 }
 
