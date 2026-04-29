@@ -1,12 +1,8 @@
 "use strict";
 
-/* Groq API configuration — key is loaded from config.js (gitignored) */
-const GROQ_API_KEY = window.GROQ_API_KEY || "";
-if (!GROQ_API_KEY) console.error("[MindMate] ⚠️ No API key found. Create config.js with: window.GROQ_API_KEY = 'your-key';");
-
+/* Anthropic API configuration — uses the built-in proxy, no API key needed */
 const _AI_HEADERS = {
   "Content-Type": "application/json",
-  "Authorization": "Bearer " + GROQ_API_KEY,
 };
 
 
@@ -248,18 +244,18 @@ Reply ONLY with a JSON array. Empty array [] if nothing new. Example format:
 Only extract facts explicitly stated. Never infer. Keep values under 15 words.`;
 
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: _AI_HEADERS,
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "claude-sonnet-4-20250514",
           max_tokens: 250,
           messages: [{ role: "user", content: prompt }],
         }),
       });
       if (!res.ok) { console.warn("[MindMate RAG] Memory extraction skipped:", res.status); return; }
       const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || "[]";
+      const text = data.content?.[0]?.text || "[]";
       const facts = JSON.parse(text.replace(/```json|```/g, "").trim());
       if (Array.isArray(facts)) facts.forEach(f => { if (f.category && f.value) upsert(f.category, f.value, f.confidence || "medium"); });
     } catch (e) { console.warn("[MindMate RAG] Memory extraction error (non-blocking):", e.message); }
@@ -280,10 +276,6 @@ const RecommendEngine = (() => {
     grounding: {
       label: "🌿 5-4-3-2-1 Grounding", urgency: "high", tags: ["anxiety", "panic", "fear"],
       desc: "Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. Pulls you back to the present moment.",
-    },
-    coldwater: {
-      label: "💧 Cold Water Reset", urgency: "high", tags: ["anxiety", "panic", "anger"],
-      desc: "Splash cold water on your face or hold ice cubes for 30 seconds. Triggers the dive reflex and slows a racing heart quickly.",
     },
     journaling: {
       label: "📓 Reflective Journaling", urgency: "medium", tags: ["stress", "sadness", "depression", "anger"],
@@ -370,9 +362,10 @@ const RecommendEngine = (() => {
 
 const CrisisDetector = (() => {
   const PATTERNS = [
-    /\b(suicid|want to die|end my life|end it all|kill myself|don't want to live|not worth living)\b/i,
+    /\b(suicid|commit suicide|want to die|wanna die|i want to die|end my life|end it all|kill myself|don't want to live|not worth living)\b/i,
     /\b(hurt myself|self.?harm|cutting myself|harming myself)\b/i,
     /\b(disappear forever|better off without me|can't go on|no reason to live)\b/i,
+    /\b(i('ll| will) (commit suicide|kill myself|end it|harm myself))\b/i,
   ];
 
   const RESPONSE =
@@ -394,11 +387,11 @@ I'm still here with you. Can you tell me a little about what's been happening?`;
 })();
 
 
-/* MODULE 6 — GROQ AI INTEGRATION */
+/* MODULE 6 — ANTHROPIC AI INTEGRATION */
 
 const groqAI = (() => {
-  const MODEL = "llama-3.3-70b-versatile";
-  const ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+  const MODEL = "claude-sonnet-4-20250514";
+  const ENDPOINT = "https://api.anthropic.com/v1/messages";
 
   function buildSystemPrompt(mv, tracker, recs, memory, sessions, turns) {
     const label = mv.score > 65 ? "positive/stable" : mv.score > 45 ? "mildly distressed" : mv.score > 28 ? "moderately distressed" : "severely distressed";
@@ -461,9 +454,8 @@ YOUR CORE INSTRUCTIONS:
   async function chat(userMessage, history, mv, tracker, recs, memory, sessions, turns) {
     const sys = buildSystemPrompt(mv, tracker, recs, memory, sessions, turns);
 
-    /* Build messages array: system prompt + last 20 history entries + current message */
+    /* Build messages array: last 20 history entries + current message */
     const msgs = [
-      { role: "system", content: sys },
       ...history.slice(-20),
       { role: "user", content: userMessage },
     ];
@@ -471,16 +463,16 @@ YOUR CORE INSTRUCTIONS:
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: _AI_HEADERS,
-      body: JSON.stringify({ model: MODEL, max_tokens: 600, messages: msgs }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 600, system: sys, messages: msgs }),
     });
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error("[MindMate AI] Groq API error:", res.status, errText);
+      console.error("[MindMate AI] Anthropic API error:", res.status, errText);
       throw new Error(`API ${res.status}: ${errText}`);
     }
     const data = await res.json();
-    return (data.choices?.[0]?.message?.content || "").trim();
+    return (data.content?.[0]?.text || "").trim();
   }
 
   return { chat };
@@ -574,7 +566,7 @@ window.MindMateBackend = {
 
 function _override() {
   window.getAIReply = getAIReplyAI;
-  console.info("[MindMate AI v2.0] ✅ Active — Claude API + RAG Memory + Mood Tracking.");
+  console.info("[MindMate AI v2.0] ✅ Active — Anthropic Claude + RAG Memory + Mood Tracking.");
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _override);
