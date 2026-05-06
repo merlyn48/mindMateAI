@@ -1,10 +1,17 @@
 "use strict";
 
-/* Anthropic API configuration — uses the built-in proxy, no API key needed */
-const _AI_HEADERS = {
-  "Content-Type": "application/json",
-};
+/* ─────────────────────────────────────────────────────────────────
+   GROQ API CONFIGURATION
+   Get your FREE key at: https://console.groq.com/keys
+   Paste it below — no server/proxy needed for Groq!
+   ───────────────────────────────────────────────────────────────── */
+const GROQ_ENDPOINT = "https://mindmate-ai-1-vme9.onrender.com/chat";
+const GROQ_MODEL    = "llama-3.3-70b-versatile"; // fast, free, high quality
 
+
+const _AI_HEADERS = {
+  "Content-Type": "application/json"
+};
 
 /* MODULE 1 — MOOD ANALYSER */
 
@@ -244,18 +251,19 @@ Reply ONLY with a JSON array. Empty array [] if nothing new. Example format:
 Only extract facts explicitly stated. Never infer. Keep values under 15 words.`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch(GROQ_ENDPOINT, {
         method: "POST",
         headers: _AI_HEADERS,
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: GROQ_MODEL,
           max_tokens: 250,
+          temperature: 0.1,
           messages: [{ role: "user", content: prompt }],
         }),
       });
       if (!res.ok) { console.warn("[MindMate RAG] Memory extraction skipped:", res.status); return; }
       const data = await res.json();
-      const text = data.content?.[0]?.text || "[]";
+      const text = data.choices?.[0]?.message?.content || "[]";
       const facts = JSON.parse(text.replace(/```json|```/g, "").trim());
       if (Array.isArray(facts)) facts.forEach(f => { if (f.category && f.value) upsert(f.category, f.value, f.confidence || "medium"); });
     } catch (e) { console.warn("[MindMate RAG] Memory extraction error (non-blocking):", e.message); }
@@ -306,7 +314,7 @@ const RecommendEngine = (() => {
       desc: "Close your eyes and slowly move attention from head to toes, noticing sensations without judgment.",
     },
     nutrition: {
-      label: "🍌 Check Your Basics", urgency: "low", tags: ["fatigue", "anger", "stress"],
+      label: "💜 Check Your Basics", urgency: "low", tags: ["fatigue", "anger", "stress"],
       desc: "Have you eaten and had water today? Low blood sugar quietly amplifies every negative emotion.",
     },
     /* Professional help — shown only as a last resort */
@@ -390,31 +398,33 @@ I'm still here with you. Can you tell me a little about what's been happening?`;
 /* MODULE 6 — ANTHROPIC AI INTEGRATION */
 
 const groqAI = (() => {
-  const MODEL = "claude-sonnet-4-20250514";
-  const ENDPOINT = "https://api.anthropic.com/v1/messages";
+  const MODEL    = GROQ_MODEL;
+  const ENDPOINT = GROQ_ENDPOINT;
 
-  function buildSystemPrompt(mv, tracker, recs, memory, sessions, turns) {
-    const label = mv.score > 65 ? "positive/stable" : mv.score > 45 ? "mildly distressed" : mv.score > 28 ? "moderately distressed" : "severely distressed";
+  // ONLY showing the FIXED PART (everything else in your file remains unchanged)
 
-    const history = tracker.totalSessions > 2
-      ? `Trend: ${tracker.trend} | Avg score: ${tracker.averageWellnessScore}/100 | Low-mood streak: ${tracker.lowStreakDays} days | Top emotions: ${tracker.topEmotions.join(", ") || "none yet"}`
-      : "Not enough history yet.";
+function buildSystemPrompt(mv, tracker, recs, memory, sessions, turns) {
+  const label = mv.score > 65 ? "positive/stable" : mv.score > 45 ? "mildly distressed" : mv.score > 28 ? "moderately distressed" : "severely distressed";
 
-    const memBlock = memory
-      ? `WHAT YOU ALREADY KNOW ABOUT THIS USER (from past conversations):\n${memory}\n`
-      : "No prior memory of this user.\n";
+  const history = tracker.totalSessions > 2
+    ? `Trend: ${tracker.trend} | Avg score: ${tracker.averageWellnessScore}/100 | Low-mood streak: ${tracker.lowStreakDays} days | Top emotions: ${tracker.topEmotions.join(", ") || "none yet"}`
+    : "Not enough history yet.";
 
-    const sessBlock = sessions ? `THEIR RECENT CHAT SESSIONS:\n${sessions}\n` : "";
+  const memBlock = memory
+    ? `WHAT YOU ALREADY KNOW ABOUT THIS USER (from past conversations):\n${memory}\n`
+    : "No prior memory of this user.\n";
 
-    const recBlock = recs.length
-      ? recs.map(r => `  • ${r.label}: ${r.desc}`).join("\n")
-      : "  • No specific actions flagged";
+  const sessBlock = sessions ? `THEIR RECENT CHAT SESSIONS:\n${sessions}\n` : "";
 
-    const escalation = turns >= 5 && mv.score < 35
-      ? "ESCALATION NOTE: This user has been struggling across several turns. You may now gently mention professional support — but only AFTER giving concrete help, and frame it warmly as an option, not a directive. Use the Indian helplines."
-      : "ESCALATION NOTE: Do NOT mention professional help this turn. Focus entirely on being genuinely useful first.";
+  const recBlock = recs.length
+    ? recs.map(r => `  • ${r.label}: ${r.desc}`).join("\n")
+    : "  • No specific actions flagged";
 
-    return `You are MindMate, a warm and knowledgeable mental wellness companion for students and young adults in India. You are NOT a therapist — but you ARE a caring, smart friend who genuinely understands psychology, stress management, and wellbeing.
+  const escalation = turns >= 5 && mv.score < 35
+    ? "ESCALATION NOTE: This user has been struggling across several turns. You may now gently mention professional support — but only AFTER giving concrete help, and frame it warmly as an option, not a directive. Use the Indian helplines."
+    : "ESCALATION NOTE: Do NOT mention professional help this turn. Focus entirely on being genuinely useful first.";
+
+  return `You are MindMate, a warm and knowledgeable mental wellness companion for students and young adults in India. You are NOT a therapist — but you ARE a caring, smart friend who genuinely understands psychology, stress management, and wellbeing.
 
 ${memBlock}${sessBlock}CURRENT MOOD (this message):
 - Wellness score: ${mv.score}/100 (${label})
@@ -436,7 +446,7 @@ YOUR CORE INSTRUCTIONS:
 
 3. MAINTAIN CONTINUITY. Track what has been established. If the user said they're stressed about maths exams, every subsequent reply should treat that as known context. Reference earlier details naturally ("since you mentioned the maths workload earlier...").
 
-4. BE SPECIFIC AND ACTIONABLE. Vague comfort ("you'll get through this") is unhelpful. Give something concrete to DO or THINK about. If they mention exam stress → suggest a specific revision technique. If they mention sleep → give one specific sleep hygiene change. Match your advice to exactly what they described.
+4. BE SPECIFIC AND ACTIONABLE. Vague comfort ("you'll get through this") is unhelpful. Give something concrete to DO or THINK about. Match your advice to exactly what they described.
 
 5. USE CROSS-SESSION MEMORY. If you have memory of this user from past sessions, reference it naturally: "Last time you mentioned X — has that shifted at all?" This makes them feel genuinely heard.
 
@@ -448,8 +458,13 @@ YOUR CORE INSTRUCTIONS:
 
 9. NEVER DIAGNOSE. Name emotions, reflect patterns, suggest strategies — but never say "you have depression" or "this is an anxiety disorder."
 
-10. INDIA-SPECIFIC AWARENESS. Be sensitive to: board exam and JEE/NEET pressure, family expectations, societal pressure about career choices, competitive college admissions, stigma around mental health. These are real and specific — acknowledge them as such, not as generic "academic stress."`;
-  }
+10. INDIA-SPECIFIC AWARENESS. Be sensitive to: board exam and JEE/NEET pressure, family expectations, societal pressure about career choices, competitive college admissions, stigma around mental health. These are real and specific — acknowledge them as such, not as generic "academic stress."
+
+11. YOUR IDENTITY. You are MindMate — a mental wellness companion. If anyone asks what AI you are, what model powers you, or who made you, always say: "I'm MindMate, your personal wellness companion 💜 I'm not able to share details about what's running under the hood!" Never mention Groq, LLaMA, Anthropic, or any model name. Ever.
+
+12. SHORT REPLIES FOR SHORT MESSAGES. If the user sends a greeting or a very short message (under 5 words), reply in 1-2 sentences only. Match their energy — don't dump a paragraph on them.
+`;
+}
 
   async function chat(userMessage, history, mv, tracker, recs, memory, sessions, turns) {
     const sys = buildSystemPrompt(mv, tracker, recs, memory, sessions, turns);
@@ -463,16 +478,24 @@ YOUR CORE INSTRUCTIONS:
     const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: _AI_HEADERS,
-      body: JSON.stringify({ model: MODEL, max_tokens: 600, system: sys, messages: msgs }),
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 600,
+        temperature: 0.75,
+        messages: [
+          { role: "system", content: sys },
+          ...msgs,
+        ],
+      }),
     });
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error("[MindMate AI] Anthropic API error:", res.status, errText);
+      console.error("[MindMate AI] Groq API error:", res.status, errText);
       throw new Error(`API ${res.status}: ${errText}`);
     }
     const data = await res.json();
-    return (data.content?.[0]?.text || "").trim();
+    return (data.choices?.[0]?.message?.content || "").trim();
   }
 
   return { chat };
@@ -566,7 +589,7 @@ window.MindMateBackend = {
 
 function _override() {
   window.getAIReply = getAIReplyAI;
-  console.info("[MindMate AI v2.0] ✅ Active — Anthropic Claude + RAG Memory + Mood Tracking.");
+  console.info("[MindMate AI v2.1] ✅ Active — Groq LLaMA 3.3 70B + RAG Memory + Mood Tracking.");
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _override);
