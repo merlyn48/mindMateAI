@@ -1,0 +1,26 @@
+{
+  "name": "mindmate-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.1"
+  },
+  "description": "MindMate AI is a web-based student wellbeing assistant designed to help students reflect on their mood, track emotional wellbeing, and access supportive resources.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/merlyn48/mindmate-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/merlyn48/mindmate-ai/issues"
+  },
+  "homepage": "https://github.com/merlyn48/mindmate-ai#readme"
+}
